@@ -14,8 +14,9 @@ The primary application technology direction is accepted in [ADR 0001](decisions
 - **State management:** Riverpod
 - **Route-based navigation:** GoRouter
 - **Local database technology:** SQLite
+- **Dart persistence and query layer:** Drift
 
-The exact Dart SQLite package, ORM, or query layer remains **TBD — requires architectural decision before implementation.**
+See [ADR 0001](decisions/0001-application-technology-stack.md) and [ADR 0002](decisions/0002-local-persistence-with-drift.md).
 
 ## Architectural constraints
 
@@ -43,7 +44,7 @@ These are responsibilities, not a prescribed code structure.
 
 Desktop and mobile share domain models, core application logic, persistence abstractions, content structures, validation rules, search and synchronization concepts, and business rules. They may differ substantially in navigation, layout, pinboard behaviour, panel placement, window management, toolbar and status presentation, editing surfaces, and interaction density.
 
-UI widgets must not directly own persistence logic. Persistence is accessed through abstractions or repository interfaces, and the eventual synchronization layer must not be tightly coupled to widgets. Domain models and shared Idea content must not contain desktop-only pinboard coordinates or depend on platform presentation state.
+UI widgets must not directly own persistence logic or run Drift queries. Persistence is accessed through repository interfaces, and the eventual synchronization layer must not be tightly coupled to widgets. Riverpod providers do not replace repository boundaries. Domain models remain independent of Drift-generated types, and shared Idea content must not contain desktop-only pinboard coordinates or depend on platform presentation state.
 
 Riverpod exposes application and presentation state without replacing domain, application-service, or repository boundaries. State organization remains modular, and business rules do not live directly in UI widgets.
 
@@ -51,9 +52,11 @@ GoRouter handles top-level route-based navigation. Desktop pinboard windows do n
 
 ## Local persistence direction
 
-SQLite is accepted as the local database technology. Schema and persistence design must support stable identifiers, explicit ordering, created and updated timestamps, soft deletion or Trash, versioned content blocks, future synchronization metadata and conflict handling, and platform-specific layout data stored separately from shared content.
+SQLite is the local database technology, with Drift as the Dart persistence and query layer. Repository implementations may translate between Drift records and domain models. Database-opening and bootstrap details may vary by platform behind the persistence boundary, but the persistence layer must not assume Windows-only behaviour.
 
-The exact Dart SQLite package, ORM, or query layer is **TBD — requires architectural decision before implementation.**
+The local database is the device's durable source of data. devGarden remains local-first, not cloud-dependent, and must operate offline without cloud infrastructure. Schema and persistence design must support stable identifiers, explicit ordering, created and updated timestamps, soft deletion or Trash, versioned content blocks, future synchronization metadata and conflict handling, and platform-specific layout data stored separately from shared content.
+
+Drift migration facilities will support explicit, versioned schema evolution. Destructive migrations require strong justification and must never silently discard user data. Foreign keys and cascade behaviour must be designed deliberately. Drift-generated types are persistence implementation details, not shared domain models by default.
 
 ## Offline and synchronization direction
 
@@ -63,15 +66,21 @@ Local work must remain safe when disconnected. Eventual synchronization must det
 
 Every item below is **TBD — requires architectural decision before implementation.** Record each accepted choice in [Architectural Decision Records](decisions/README.md).
 
-- Exact Dart SQLite package, ORM, or query layer
+- Stable identifier format
+- Database file location and naming
+- Database backup and recovery strategy
+- Full relational schema design
+- Block payload persistence and versioning strategy
+- Synchronization metadata design
 - Synchronization architecture
 - Authentication strategy
 - Cloud provider, if any
 - Rich-text or block-editor framework
 - Desktop pinboard implementation
 - Flowchart library
-- Search indexing strategy
+- Search indexing and SQLite FTS strategy
 - Import and export implementation details
+- Layout-preference synchronization policy
 - Packaging and distribution details
 - App-store strategy
 - Licensing

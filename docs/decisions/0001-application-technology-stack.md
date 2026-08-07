@@ -119,9 +119,10 @@ Flutter is not assumed to eliminate platform-specific work or package risk.
 
 ## Follow-up decisions
 
+[ADR 0002](0002-local-persistence-with-drift.md) resolved the Dart SQLite persistence and query layer by selecting Drift.
+
 The following remain **TBD — requires architectural decision before implementation:**
 
-- Exact Dart SQLite package, ORM, or query layer
 - Rich block-editor framework or custom implementation strategy
 - Desktop pinboard implementation
 - Flowchart library or implementation

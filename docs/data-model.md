@@ -1,6 +1,6 @@
 # Conceptual data model
 
-This model describes product concepts independently of storage schema and serialization. SQLite is accepted as the local database technology in [ADR 0001](decisions/0001-application-technology-stack.md), while its Dart package, ORM or query layer, schema, migrations, and serialization details remain **TBD — requires architectural decision before implementation.**
+This document describes conceptual entities rather than final Drift tables. SQLite with Drift is accepted for local relational persistence by [ADR 0001](decisions/0001-application-technology-stack.md) and [ADR 0002](decisions/0002-local-persistence-with-drift.md). The final schema, database file details, migrations, identifier format, and serialization remain **TBD — requires architectural decision before implementation.** Domain models must not depend directly on Drift-generated table or data classes.
 
 ## Hierarchy and ownership
 
@@ -91,11 +91,13 @@ These entities are presentation data. Desktop layout state must never be embedde
 ## Integrity and evolution rules
 
 - Use stable identifiers.
+- Do not rely solely on SQLite auto-increment integers as externally meaningful or sync-capable identity. The stable identifier format remains **TBD — requires architectural decision before implementation.**
 - Use explicit sort order; timestamps alone do not define order.
 - Prefer Trash or soft deletion over immediate permanent deletion.
 - Relationships must not cause hard deletion cascades that silently remove unrelated content.
-- Version block payloads so editors and migrations can evolve safely.
+- Version block payloads so editors and migrations can evolve safely. **TBD — block payload persistence and versioning strategy.**
 - Audit or history support may be added later.
 - Sync metadata and conflict representation require a future decision.
+- Platform-specific layout records remain separate from shared content; their future synchronization policy is unresolved.
 
 See [architecture](architecture.md) and [editor and content blocks](editor-and-content-blocks.md).

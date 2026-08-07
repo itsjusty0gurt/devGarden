@@ -7,13 +7,14 @@ Roadmap entries describe sequencing, not authorization to implement future scope
 - Create source-of-truth documentation.
 - Confirm identity, hierarchy, and desktop/mobile interaction models.
 - Primary technology stack selected through [ADR 0001](decisions/0001-application-technology-stack.md): Flutter, Dart, Windows first, Android next, Riverpod, GoRouter, and SQLite.
+- Local persistence layer selected through [ADR 0002](decisions/0002-local-persistence-with-drift.md): Drift over SQLite.
 - Record initial ADRs and repository standards.
 
 No full application implementation belongs in this milestone.
 
 ## Milestone 1 — Local desktop foundation
 
-Milestone 1 will target Flutter and Dart on Windows desktop, using Riverpod, GoRouter, and SQLite at the technology level. The exact Dart SQLite package or query layer remains unresolved. This milestone has not started.
+Milestone 1 will target Flutter and Dart on Windows desktop, using Riverpod, GoRouter, and Drift over SQLite for local persistence. This milestone has not started.
 
 - Launchable desktop shell with menu, toolbar, Project Explorer, divider, work area, and status bar.
 - Default dark theme and basic settings persistence.
