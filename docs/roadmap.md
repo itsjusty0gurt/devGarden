@@ -15,9 +15,17 @@ No full application implementation belongs in this milestone.
 
 ## Milestone 1 — Local desktop foundation
 
-Milestone 1 will target Flutter and Dart on Windows desktop, using Riverpod, GoRouter, and Drift over SQLite for local persistence. This milestone has not started.
+Milestone 1 targets Flutter and Dart on Windows desktop, using Riverpod, GoRouter, and Drift over SQLite for local persistence. The desktop-shell portion is in progress.
 
 Schema implementation still requires selection of a Dart UUID v7 implementation and SQLite UUID representation; neither is selected in Milestone 0.
+
+Implementation progress as of 2026-08-07:
+
+- Completed the runnable Windows Flutter scaffold and initial desktop shell.
+- Implemented the menu bar, restrained toolbar, Project Explorer, draggable divider, work area, and status bar.
+- Implemented left/right Explorer placement, persisted width and side, System/Light/Dark appearance, and persisted content zoom using presentation-only JSON preferences.
+- Added Riverpod shell state, GoRouter top-level placeholder views, safe keyboard actions, command-palette and Quick Open placeholders, and focused shell tests.
+- Domain CRUD, Drift/SQLite persistence, schema design, and UUID generation have not started. Milestone 1 is not complete.
 
 - Launchable desktop shell with menu, toolbar, Project Explorer, divider, work area, and status bar.
 - Default dark theme and basic settings persistence.

@@ -2,7 +2,7 @@
 
 ## Status
 
-The primary application technology direction is accepted in [ADR 0001](decisions/0001-application-technology-stack.md). Application implementation has not started.
+The primary application technology direction is accepted in [ADR 0001](decisions/0001-application-technology-stack.md). Milestone 1 implementation has begun with the Windows desktop shell; domain and database implementation have not started.
 
 ## Confirmed technology direction
 
@@ -58,6 +58,8 @@ SQLite is the local database technology, with Drift as the Dart persistence and 
 The local database is the device's durable source of data. devGarden remains local-first, not cloud-dependent, and must operate offline without cloud infrastructure. Schema and persistence design must support stable identifiers, explicit ordering, created and updated timestamps, soft deletion or Trash, versioned content blocks, future synchronization metadata and conflict handling, and platform-specific layout data stored separately from shared content.
 
 Drift migration facilities will support explicit, versioned schema evolution. Destructive migrations require strong justification and must never silently discard user data. Foreign keys and cascade behaviour must be designed deliberately. Drift-generated types are persistence implementation details, not shared domain models by default.
+
+The initial shell persists presentation-only preferences in a small local JSON file. This store is limited to Explorer placement and width, appearance mode, and content zoom. It is not domain persistence and does not replace the accepted Drift and SQLite boundary.
 
 ## Stable identity direction
 
