@@ -2,7 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../presentation/shell/desktop_shell.dart';
-import '../presentation/views/placeholder_views.dart';
+import '../presentation/garden/garden_home_view.dart';
+import '../presentation/garden/idea_editor_view.dart';
 import '../presentation/views/settings_view.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -15,34 +16,28 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/',
             name: 'welcome',
-            builder: (context, state) => const WelcomeView(),
+            builder: (context, state) => const GardenHomeView(),
           ),
           GoRoute(
             path: '/workspace',
             name: 'workspace',
-            builder: (context, state) => const PlaceholderView(
-              title: 'Workspace',
-              message: 'Workspace content is not implemented yet.',
-              icon: PlaceholderViewIcon.workspace,
-            ),
+            builder: (context, state) => const GardenHomeView(),
           ),
           GoRoute(
             path: '/project',
             name: 'project',
-            builder: (context, state) => const PlaceholderView(
-              title: 'Project',
-              message: 'Project content is not implemented yet.',
-              icon: PlaceholderViewIcon.project,
-            ),
+            builder: (context, state) => const GardenHomeView(),
           ),
           GoRoute(
             path: '/app',
             name: 'app',
-            builder: (context, state) => const PlaceholderView(
-              title: 'App',
-              message: 'App content is not implemented yet.',
-              icon: PlaceholderViewIcon.app,
-            ),
+            builder: (context, state) => const GardenHomeView(),
+          ),
+          GoRoute(
+            path: '/idea/:id',
+            name: 'idea',
+            builder: (context, state) =>
+                IdeaEditorView(ideaId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: '/settings',

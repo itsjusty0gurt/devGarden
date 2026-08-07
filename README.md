@@ -6,7 +6,7 @@ devGarden is a developer-focused workspace for capturing, organizing, connecting
 
 ## Status
 
-Milestone 1 has begun with the initial Windows desktop shell. The menu bar, toolbar, Project Explorer, resizable work area, status bar, routed placeholders, appearance modes, and presentation preference persistence are implemented. Domain content and Drift persistence have not started.
+Milestone 1 now includes the initial Windows desktop shell and the first durable product slice. Users can create a Workspace, Project, and App, capture and edit a plain-text Idea immediately, search the current App, and archive an Idea through Drift-backed local SQLite persistence. Rich content blocks, Idea Groups, full Trash, sync, and mobile presentation remain future work.
 
 ## Technology direction
 

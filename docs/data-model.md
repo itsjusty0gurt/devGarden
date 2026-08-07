@@ -1,6 +1,19 @@
 # Conceptual data model
 
-This document describes conceptual entities rather than final Drift tables. SQLite with Drift is accepted for local relational persistence by [ADR 0001](decisions/0001-application-technology-stack.md) and [ADR 0002](decisions/0002-local-persistence-with-drift.md). UUID v7 is accepted as the stable identifier format by [ADR 0003](decisions/0003-stable-identifiers-with-uuid-v7.md). The final schema, database file details, migrations, UUID storage representation, and serialization remain **TBD — requires architectural decision before implementation.** Domain models must not depend directly on Drift-generated table or data classes.
+This document describes the broader conceptual model and the smaller implemented schema. SQLite with Drift is accepted for local relational persistence by [ADR 0001](decisions/0001-application-technology-stack.md) and [ADR 0002](decisions/0002-local-persistence-with-drift.md). UUID v7 is accepted as the stable identifier format by [ADR 0003](decisions/0003-stable-identifiers-with-uuid-v7.md). Domain models do not depend directly on Drift-generated table or data classes.
+
+## Implemented schema version 1
+
+The first vertical slice persists only:
+
+- Workspace: `id`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
+- Project: `id`, `workspaceId`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
+- App: `id`, `projectId`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
+- Idea: `id`, `appId`, `title`, plain-text `body`, `lifecycle`, `createdAt`, `updatedAt`, `sortOrder`, `isPinned`, `isDeleted`
+
+IDs and foreign IDs use canonical UUID v7 strings stored as SQLite `TEXT`. The domain wraps them in `EntityId`, so application logic does not depend on that storage representation. Foreign keys preserve `Workspace → Project → App → Idea` and use restrictive deletion behavior rather than destructive cascades. Schema changes after version 1 require explicit Drift migrations.
+
+Idea Group and every other conceptual entity below remain unimplemented. The future full schema, block serialization, import identity, backup and recovery, and synchronization metadata remain **TBD — requires architectural decision before implementation.**
 
 ## Hierarchy and ownership
 

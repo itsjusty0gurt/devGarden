@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/preferences/shell_preferences.dart';
+import '../garden/hierarchy_controller.dart';
+import '../garden/idea_controller.dart';
 import 'project_explorer.dart';
 import 'shell_controller.dart';
 import 'shell_menu_bar.dart';
@@ -29,6 +31,7 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
   @override
   Widget build(BuildContext context) {
     final shellState = ref.watch(shellControllerProvider);
+    final ideaState = ref.watch(ideaControllerProvider);
 
     return CallbackShortcuts(
       bindings: {
@@ -48,8 +51,8 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
           shift: true,
         ): () =>
             unawaited(_showFindInProject()),
-        const SingleActivator(LogicalKeyboardKey.keyS, control: true):
-            _controller.saveUnavailable,
+        const SingleActivator(LogicalKeyboardKey.keyS, control: true): () =>
+            unawaited(_save()),
         const SingleActivator(LogicalKeyboardKey.escape): _closeTransient,
       },
       child: Focus(
@@ -67,11 +70,11 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
                       _explorerTemporarilyHidden = !_explorerTemporarilyHidden;
                     });
                   },
-                  onNew: () => _controller.placeholder('New'),
-                  onSave: _controller.saveUnavailable,
+                  onNew: () => unawaited(_newIdea()),
+                  onSave: () => unawaited(_save()),
                   onUndo: null,
                   onRedo: null,
-                  onSearch: () => unawaited(_showFindInProject()),
+                  onSearch: () => context.go('/app'),
                   onZoomOut: () =>
                       _controller.fireAndForget(_controller.changeZoom(-0.1)),
                   onZoomIn: () =>
@@ -95,7 +98,9 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
                   ),
                 ),
                 const Divider(height: 1),
-                ShellStatusBar(message: shellState.statusMessage),
+                ShellStatusBar(
+                  message: ideaState.statusMessage ?? shellState.statusMessage,
+                ),
               ],
             ),
           ),
@@ -174,7 +179,8 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
   ShellMenuActions _menuActions() {
     return ShellMenuActions(
       placeholder: _controller.placeholder,
-      save: _controller.saveUnavailable,
+      newIdea: () => unawaited(_newIdea()),
+      save: () => unawaited(_save()),
       openSettings: () => context.go('/settings'),
       commandPalette: () => unawaited(_showCommandPalette()),
       quickOpen: () => unawaited(_showQuickOpen()),
@@ -235,17 +241,18 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
 
   Future<void> _showQuickOpen() => _showMessageDialog(
     title: 'Quick Open',
-    message: 'Quick Open will be available after project content exists.',
+    message: 'Quick Open is deferred beyond the current Idea slice.',
   );
 
   Future<void> _showFindInProject() => _showMessageDialog(
     title: 'Find in Project',
-    message: 'Find in Project will be available after project content exists.',
+    message:
+        'Use the Ideas search field for title and body search in the current App.',
   );
 
   Future<void> _showAbout() => _showMessageDialog(
     title: 'About devGarden',
-    message: 'devGarden\nWhere ideas grow!\n\nMilestone 1 desktop shell.',
+    message: 'devGarden\nWhere ideas grow!\n\nLocal capture-first Ideas.',
   );
 
   Future<void> _showMessageDialog({
@@ -272,6 +279,31 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
     if (navigator.canPop()) {
       navigator.pop();
     }
+  }
+
+  Future<void> _newIdea() async {
+    if (ref.read(selectedAppIdProvider) == null) {
+      _controller.setStatus('Create or select an App before adding an Idea.');
+      return;
+    }
+    try {
+      final idea = await ref.read(ideaControllerProvider.notifier).capture();
+      if (mounted) context.go('/idea/${idea.id.value}');
+    } catch (_) {
+      _controller.setStatus('Idea creation failed.');
+    }
+  }
+
+  Future<void> _save() async {
+    final ideas = ref.read(ideaControllerProvider);
+    final isEditingIdea = GoRouterState.of(
+      context,
+    ).uri.path.startsWith('/idea/');
+    if (!isEditingIdea || ideas.current == null) {
+      _controller.saveUnavailable();
+      return;
+    }
+    await ref.read(ideaControllerProvider.notifier).flush();
   }
 
   String _themeModeLabel(ThemeMode mode) {

@@ -121,6 +121,8 @@ When persistence implementation begins, database and repository testing should s
 
 [ADR 0003](0003-stable-identifiers-with-uuid-v7.md) later resolved the stable identifier format by selecting UUID v7.
 
+Implementation note (2026-08-07): The first product slice introduced Drift schema version 1 for Workspace, Project, App, and Idea. On Windows, `devGarden.sqlite` is stored under the per-user `%APPDATA%\devGarden` directory. Database access is initialized once and remains behind repository interfaces. This note records the later implementation without altering the original decision. The database file location and naming entry in the historical list below is therefore resolved; the other entries remain TBD.
+
 The following remain **TBD — requires architectural decision before implementation:**
 
 - Database file location and naming

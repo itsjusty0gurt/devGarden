@@ -2,7 +2,7 @@
 
 ## Status
 
-The primary application technology direction is accepted in [ADR 0001](decisions/0001-application-technology-stack.md). Milestone 1 implementation has begun with the Windows desktop shell; domain and database implementation have not started.
+The primary application technology direction is accepted in [ADR 0001](decisions/0001-application-technology-stack.md). The Windows desktop shell and first capture-first persistence slice are implemented for Workspace, Project, App, and Idea.
 
 ## Confirmed technology direction
 
@@ -61,6 +61,10 @@ Drift migration facilities will support explicit, versioned schema evolution. De
 
 The initial shell persists presentation-only preferences in a small local JSON file. This store is limited to Explorer placement and width, appearance mode, and content zoom. It is not domain persistence and does not replace the accepted Drift and SQLite boundary.
 
+The first domain schema is Drift schema version 1 with Workspace, Project, App, and Idea tables only. Stable UUID v7 identifiers are canonical UUID `TEXT` primary and foreign keys. Foreign keys use restrictive deletion behavior; archive/delete actions set `isDeleted` rather than physically removing records. Drift is opened once at application startup and remains behind domain repository interfaces. Tests may inject an in-memory or temporary-file database.
+
+On Windows, the database is named `devGarden.sqlite` and stored in the per-user `%APPDATA%\devGarden` directory. A database-path interface keeps this platform choice outside repositories so a future Android adapter can select its proper application-data location independently.
+
 ## Stable identity direction
 
 Persisted domain objects that require durable identity use application-generated UUID v7 identifiers. IDs can be assigned offline before persistence and remain unchanged when an object is renamed, edited, moved, or later synchronized. Duplicating an object normally creates a new UUID because it represents a new logical object.
@@ -69,7 +73,7 @@ Stable domain identity is independent of SQLite row IDs and Drift implementation
 
 UUID v7 timestamp characteristics do not replace explicit ordering or created and updated timestamps. User-controlled collections retain explicit sort-order fields.
 
-The Dart UUID v7 package or implementation and SQLite `TEXT` versus binary representation are **TBD — requires architectural decision before implementation.** Import identity and collision policy also remains unresolved.
+The implementation uses the maintained Dart `uuid` package to generate RFC 9562 UUID v7 values application-side before persistence. Schema version 1 stores canonical UUID strings as SQLite `TEXT` for readable, simple foreign keys while the domain uses an `EntityId` value object independent of SQLite representation. Import identity and collision policy remains unresolved.
 
 ## Offline and synchronization direction
 
@@ -79,10 +83,7 @@ Local work must remain safe when disconnected. Eventual synchronization must det
 
 Every item below is **TBD — requires architectural decision before implementation.** Record each accepted choice in [Architectural Decision Records](decisions/README.md).
 
-- Dart UUID v7 package or implementation
-- SQLite representation of UUID v7 identifiers
 - Import identity and collision policy
-- Database file location and naming
 - Database backup and recovery strategy
 - Full relational schema design
 - Block payload persistence and versioning strategy

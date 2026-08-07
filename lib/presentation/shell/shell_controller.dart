@@ -99,7 +99,7 @@ class ShellController extends StateNotifier<ShellState> {
   static String displayZoom(double zoom) => '${(zoom * 100).round()}%';
 
   void saveUnavailable() {
-    setStatus('Save unavailable — no document is open.');
+    setStatus('Save unavailable — no Idea is open.');
   }
 
   void placeholder(String action) {

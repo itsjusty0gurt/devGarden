@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 class ShellMenuActions {
   const ShellMenuActions({
     required this.placeholder,
+    required this.newIdea,
     required this.save,
     required this.openSettings,
     required this.commandPalette,
@@ -15,6 +16,7 @@ class ShellMenuActions {
   });
 
   final ValueChanged<String> placeholder;
+  final VoidCallback newIdea;
   final VoidCallback save;
   final VoidCallback openSettings;
   final VoidCallback commandPalette;
@@ -41,7 +43,10 @@ class ShellMenuBar extends StatelessWidget {
           children: [
             SubmenuButton(
               menuChildren: [
-                _placeholder('New'),
+                MenuItemButton(
+                  onPressed: actions.newIdea,
+                  child: const Text('New Idea'),
+                ),
                 _placeholder('Open'),
                 MenuItemButton(
                   onPressed: actions.save,
@@ -112,9 +117,12 @@ class ShellMenuBar extends StatelessWidget {
                   'New Project',
                   'New App',
                   'New Idea Group',
-                  'New Idea',
                 ])
                   _placeholder(label),
+                MenuItemButton(
+                  onPressed: actions.newIdea,
+                  child: const Text('New Idea'),
+                ),
               ],
               child: const Text('Projects'),
             ),

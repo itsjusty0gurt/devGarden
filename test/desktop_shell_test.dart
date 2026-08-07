@@ -1,5 +1,7 @@
 import 'package:dev_garden/app/app.dart';
+import 'package:dev_garden/app/providers.dart';
 import 'package:dev_garden/core/preferences/shell_preferences.dart';
+import 'package:dev_garden/infrastructure/database/app_database.dart';
 import 'package:dev_garden/presentation/shell/desktop_shell.dart';
 import 'package:dev_garden/presentation/shell/shell_controller.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:drift/native.dart';
 
 void main() {
   testWidgets('app launches with all top-level desktop shell regions', (
@@ -14,15 +17,14 @@ void main() {
   ) async {
     await _pumpApp(tester);
 
-    expect(find.text('devGarden'), findsOneWidget);
-    expect(find.text('Where ideas grow!'), findsOneWidget);
+    expect(find.text('Create your first Workspace'), findsOneWidget);
     expect(find.byKey(const Key('menu-bar-region')), findsOneWidget);
     expect(find.byKey(const Key('toolbar-region')), findsOneWidget);
     expect(find.byKey(const Key('project-explorer-region')), findsOneWidget);
     expect(find.byKey(const Key('explorer-divider')), findsOneWidget);
     expect(find.byKey(const Key('work-area-region')), findsOneWidget);
     expect(find.byKey(const Key('status-bar-region')), findsOneWidget);
-    expect(find.text('Layout preview — no saved project data'), findsOneWidget);
+    expect(find.text('No Workspaces yet.'), findsOneWidget);
     expect(find.text('Ready'), findsOneWidget);
   });
 
@@ -121,19 +123,17 @@ void main() {
     }
   });
 
-  testWidgets('top-level placeholder routes render', (tester) async {
+  testWidgets('top-level hierarchy routes preserve the product view', (
+    tester,
+  ) async {
     await _pumpApp(tester);
     final context = tester.element(find.byType(DesktopShell));
     final router = GoRouter.of(context);
 
-    for (final route in const {
-      '/workspace': 'Workspace',
-      '/project': 'Project',
-      '/app': 'App',
-    }.entries) {
-      router.go(route.key);
+    for (final route in const ['/workspace', '/project', '/app']) {
+      router.go(route);
       await tester.pumpAndSettle();
-      expect(find.text(route.value), findsWidgets);
+      expect(find.text('Create your first Workspace'), findsOneWidget);
     }
   });
 
@@ -145,10 +145,7 @@ void main() {
     await tester.tap(find.byTooltip('Save'));
     await tester.pump();
 
-    expect(
-      find.text('Save unavailable — no document is open.'),
-      findsOneWidget,
-    );
+    expect(find.text('Save unavailable — no Idea is open.'), findsOneWidget);
   });
 
   testWidgets('command palette shortcut opens safe shell commands', (
@@ -175,11 +172,14 @@ Future<void> _pumpApp(
   MemoryShellPreferencesStore? store,
 }) async {
   final preferencesStore = store ?? MemoryShellPreferencesStore();
+  final database = AppDatabase(NativeDatabase.memory());
+  addTearDown(database.close);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         shellPreferencesStoreProvider.overrideWithValue(preferencesStore),
         initialShellPreferencesProvider.overrideWithValue(initialPreferences),
+        databaseProvider.overrideWithValue(database),
       ],
       child: const GardenApplication(),
     ),

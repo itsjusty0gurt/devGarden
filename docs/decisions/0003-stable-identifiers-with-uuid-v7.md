@@ -144,6 +144,8 @@ UUID v7 does not replace explicit timestamps, user-controlled ordering, synchron
 
 ## Follow-up decisions
 
+Implementation note (2026-08-07): The first persistence slice selected the Dart `uuid` package for RFC 9562 UUID v7 generation and canonical UUID strings stored as SQLite `TEXT`. IDs are generated application-side before repository insertion, while domain code uses an `EntityId` value object independent of SQLite representation. This note records the later implementation without rewriting the accepted decision. The first two entries in the historical list below are therefore resolved; database location and naming is resolved by the later implementation note in [ADR 0002](0002-local-persistence-with-drift.md); the other entries remain TBD.
+
 The following remain **TBD — requires architectural decision before implementation:**
 
 - Dart UUID v7 package or implementation
