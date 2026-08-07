@@ -1,6 +1,6 @@
 # Conceptual data model
 
-This model describes product concepts without selecting a database or serialization format. All implementation details are **TBD — requires architectural decision before implementation.**
+This model describes product concepts independently of storage schema and serialization. SQLite is accepted as the local database technology in [ADR 0001](decisions/0001-application-technology-stack.md), while its Dart package, ORM or query layer, schema, migrations, and serialization details remain **TBD — requires architectural decision before implementation.**
 
 ## Hierarchy and ownership
 

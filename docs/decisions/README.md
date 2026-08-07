@@ -2,6 +2,10 @@
 
 Significant architectural choices for devGarden must be recorded as Architectural Decision Records (ADRs). ADRs explain why a choice was made, preserve considered alternatives, and keep future sessions from silently revisiting settled ground.
 
+## Accepted decisions
+
+- [ADR 0001 — Application technology stack](0001-application-technology-stack.md) — Flutter, Dart, Windows first, Android next, Riverpod, GoRouter, and SQLite
+
 Use sequential filenames:
 
 ```text
@@ -38,9 +42,13 @@ What credible alternatives were evaluated and why were they not selected?
 
 What becomes easier, harder, constrained, or newly required?
 
-## Follow-up work
+## Follow-up work or decisions
 
 What actions or later decisions remain?
+
+## Principle alignment
+
+How does the decision preserve or advance the non-negotiable product principles?
 ```
 
 Do not record speculation as accepted. Link ADRs from [architecture](../architecture.md) and update affected source-of-truth documents when a decision changes requirements.
