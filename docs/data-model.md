@@ -1,12 +1,18 @@
 # Conceptual data model
 
-This document describes conceptual entities rather than final Drift tables. SQLite with Drift is accepted for local relational persistence by [ADR 0001](decisions/0001-application-technology-stack.md) and [ADR 0002](decisions/0002-local-persistence-with-drift.md). The final schema, database file details, migrations, identifier format, and serialization remain **TBD — requires architectural decision before implementation.** Domain models must not depend directly on Drift-generated table or data classes.
+This document describes conceptual entities rather than final Drift tables. SQLite with Drift is accepted for local relational persistence by [ADR 0001](decisions/0001-application-technology-stack.md) and [ADR 0002](decisions/0002-local-persistence-with-drift.md). UUID v7 is accepted as the stable identifier format by [ADR 0003](decisions/0003-stable-identifiers-with-uuid-v7.md). The final schema, database file details, migrations, UUID storage representation, and serialization remain **TBD — requires architectural decision before implementation.** Domain models must not depend directly on Drift-generated table or data classes.
 
 ## Hierarchy and ownership
 
 `Workspace → Project → App → optional Idea Group → Idea`
 
 An Idea belongs to an App but may omit an Idea Group. Workspace, Project, App, and Idea Group are product concepts, not necessarily filesystem directories.
+
+## Identifier convention
+
+For persisted domain entities requiring durable identity, `id` means **UUID v7 stable identifier**. Foreign identifiers such as `workspace id`, `project id`, `app id`, and relationship source or target IDs conceptually reference those stable UUIDs. SQLite row IDs and Drift-generated identities are not canonical domain identity.
+
+IDs are generated locally before persistence when necessary. Renaming, editing, or moving an object does not change its ID; duplicating an object normally creates a new UUID. Import identity and collision handling remain **TBD — requires architectural decision before implementation.**
 
 ## Core entities
 
@@ -90,9 +96,10 @@ These entities are presentation data. Desktop layout state must never be embedde
 
 ## Integrity and evolution rules
 
-- Use stable identifiers.
-- Do not rely solely on SQLite auto-increment integers as externally meaningful or sync-capable identity. The stable identifier format remains **TBD — requires architectural decision before implementation.**
+- Use application-generated UUID v7 stable identifiers for persisted domain objects requiring durable identity.
+- Do not rely on SQLite auto-increment integers as externally meaningful, exported, or sync-capable identity.
 - Use explicit sort order; timestamps alone do not define order.
+- Keep created and updated timestamps as explicit metadata; do not derive them from UUID v7.
 - Prefer Trash or soft deletion over immediate permanent deletion.
 - Relationships must not cause hard deletion cascades that silently remove unrelated content.
 - Version block payloads so editors and migrations can evolve safely. **TBD — block payload persistence and versioning strategy.**

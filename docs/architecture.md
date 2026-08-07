@@ -15,8 +15,9 @@ The primary application technology direction is accepted in [ADR 0001](decisions
 - **Route-based navigation:** GoRouter
 - **Local database technology:** SQLite
 - **Dart persistence and query layer:** Drift
+- **Stable domain identifier format:** UUID v7
 
-See [ADR 0001](decisions/0001-application-technology-stack.md) and [ADR 0002](decisions/0002-local-persistence-with-drift.md).
+See [ADR 0001](decisions/0001-application-technology-stack.md), [ADR 0002](decisions/0002-local-persistence-with-drift.md), and [ADR 0003](decisions/0003-stable-identifiers-with-uuid-v7.md).
 
 ## Architectural constraints
 
@@ -58,6 +59,16 @@ The local database is the device's durable source of data. devGarden remains loc
 
 Drift migration facilities will support explicit, versioned schema evolution. Destructive migrations require strong justification and must never silently discard user data. Foreign keys and cascade behaviour must be designed deliberately. Drift-generated types are persistence implementation details, not shared domain models by default.
 
+## Stable identity direction
+
+Persisted domain objects that require durable identity use application-generated UUID v7 identifiers. IDs can be assigned offline before persistence and remain unchanged when an object is renamed, edited, moved, or later synchronized. Duplicating an object normally creates a new UUID because it represents a new logical object.
+
+Stable domain identity is independent of SQLite row IDs and Drift implementation types. Internal integer values may exist if later implementation evidence justifies them, but they are not canonical identity, export identity, or synchronization identity. Relationships conceptually reference stable UUIDs.
+
+UUID v7 timestamp characteristics do not replace explicit ordering or created and updated timestamps. User-controlled collections retain explicit sort-order fields.
+
+The Dart UUID v7 package or implementation and SQLite `TEXT` versus binary representation are **TBD — requires architectural decision before implementation.** Import identity and collision policy also remains unresolved.
+
 ## Offline and synchronization direction
 
 Local work must remain safe when disconnected. Eventual synchronization must detect conflicts and preserve both versions rather than silently overwrite work. Authentication, transport, server, merge rules, encryption, and recovery are unresolved. No cloud provider or business model is assumed.
@@ -66,7 +77,9 @@ Local work must remain safe when disconnected. Eventual synchronization must det
 
 Every item below is **TBD — requires architectural decision before implementation.** Record each accepted choice in [Architectural Decision Records](decisions/README.md).
 
-- Stable identifier format
+- Dart UUID v7 package or implementation
+- SQLite representation of UUID v7 identifiers
+- Import identity and collision policy
 - Database file location and naming
 - Database backup and recovery strategy
 - Full relational schema design

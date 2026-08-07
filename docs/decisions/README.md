@@ -6,6 +6,7 @@ Significant architectural choices for devGarden must be recorded as Architectura
 
 - [ADR 0001 — Application technology stack](0001-application-technology-stack.md) — Flutter, Dart, Windows first, Android next, Riverpod, GoRouter, and SQLite
 - [ADR 0002 — Local persistence with Drift](0002-local-persistence-with-drift.md) — Drift over SQLite behind repository interfaces
+- [ADR 0003 — Stable identifiers with UUID v7](0003-stable-identifiers-with-uuid-v7.md) — application-generated UUID v7 domain identity
 
 Use sequential filenames:
 

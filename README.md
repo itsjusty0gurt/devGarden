@@ -10,9 +10,9 @@ Milestone 0: documentation and architectural decisions. The primary technology d
 
 ## Technology direction
 
-devGarden will use Flutter and Dart, targeting Windows desktop first and Android next. Riverpod is accepted for state management, GoRouter for top-level route-based navigation, and SQLite with Drift for local relational persistence. iOS, Linux, and macOS remain possible future platforms; Web would be considered only if later product requirements justify it.
+devGarden will use Flutter and Dart, targeting Windows desktop first and Android next. Riverpod is accepted for state management, GoRouter for top-level route-based navigation, SQLite with Drift for local relational persistence, and UUID v7 for stable domain identifiers. iOS, Linux, and macOS remain possible future platforms; Web would be considered only if later product requirements justify it.
 
-See [ADR 0001](docs/decisions/0001-application-technology-stack.md) for the application stack and [ADR 0002](docs/decisions/0002-local-persistence-with-drift.md) for local persistence. Application implementation has not started.
+See [ADR 0001](docs/decisions/0001-application-technology-stack.md) for the application stack, [ADR 0002](docs/decisions/0002-local-persistence-with-drift.md) for local persistence, and [ADR 0003](docs/decisions/0003-stable-identifiers-with-uuid-v7.md) for stable identity. Application implementation has not started.
 
 ## Core principles
 

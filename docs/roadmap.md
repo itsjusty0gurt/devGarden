@@ -8,6 +8,7 @@ Roadmap entries describe sequencing, not authorization to implement future scope
 - Confirm identity, hierarchy, and desktop/mobile interaction models.
 - Primary technology stack selected through [ADR 0001](decisions/0001-application-technology-stack.md): Flutter, Dart, Windows first, Android next, Riverpod, GoRouter, and SQLite.
 - Local persistence layer selected through [ADR 0002](decisions/0002-local-persistence-with-drift.md): Drift over SQLite.
+- Stable identifier format selected through [ADR 0003](decisions/0003-stable-identifiers-with-uuid-v7.md): UUID v7.
 - Record initial ADRs and repository standards.
 
 No full application implementation belongs in this milestone.
@@ -15,6 +16,8 @@ No full application implementation belongs in this milestone.
 ## Milestone 1 — Local desktop foundation
 
 Milestone 1 will target Flutter and Dart on Windows desktop, using Riverpod, GoRouter, and Drift over SQLite for local persistence. This milestone has not started.
+
+Schema implementation still requires selection of a Dart UUID v7 implementation and SQLite UUID representation; neither is selected in Milestone 0.
 
 - Launchable desktop shell with menu, toolbar, Project Explorer, divider, work area, and status bar.
 - Default dark theme and basic settings persistence.

@@ -119,9 +119,10 @@ When persistence implementation begins, database and repository testing should s
 
 ## Follow-up decisions
 
+[ADR 0003](0003-stable-identifiers-with-uuid-v7.md) later resolved the stable identifier format by selecting UUID v7.
+
 The following remain **TBD — requires architectural decision before implementation:**
 
-- Stable identifier format
 - Database file location and naming
 - Database backup and recovery
 - Block payload persistence and versioning strategy
