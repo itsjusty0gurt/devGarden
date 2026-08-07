@@ -4,7 +4,22 @@
 
 Creating an Idea must immediately open and focus a large writing area; mobile also opens the software keyboard. Organization and metadata are optional. Save and Save and Organize may both exist, but unorganized work must never be discarded. If an App is selected it may be the default; otherwise save to an Inbox or another clearly defined safe location.
 
-Potential later metadata includes title, hierarchy location, status, priority, impact, complexity, dependencies, Tags, related Ideas, architecture impact, notes, tasks, research, and decision history. None is required for initial capture.
+After capture, an Idea may optionally record:
+
+- What the Idea is
+- Why it would help
+- Title and hierarchy location
+- Status, priority, impact, and complexity
+- Dependencies, Tags, and related Ideas
+- Architecture impact
+- Rough UI notes
+- Flowcharts
+- Tasks or checklists
+- Code examples
+- Research notes
+- Decision history
+
+None of this information is required before a user can begin writing or save an Idea.
 
 ## Block model
 

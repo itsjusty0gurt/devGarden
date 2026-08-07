@@ -5,21 +5,23 @@
 The desktop shell uses a traditional menu bar, optional context-aware toolbar, persistent Project Explorer, draggable divider, large work area, and bottom status bar. The work area receives most of the window.
 
 ```text
-┌───────────────────────────────────────────────────────────┐
-│ File  Edit  Projects  Tools  Help                    │
-├───────────────────────────────────────────────────────────┤
-│ Context-aware toolbar                                │
-├──────────────────┬─────────────────────────────────────────┤
-│ Project Explorer  │ Work Area                       │
-│ Workspace tree    │ Selected content                │
-├──────────────────┴───────────────────────────────────────────────────────────┤
-│ Status and contextual information                    │
-└───────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│ File  Edit  Projects  Tools  Help                              │
+├────────────────────────────────────────────────────────────────┤
+│ Context-aware toolbar                                          │
+├────────────────────┬───────────────────────────────────────────┤
+│ Project Explorer   │ Work Area                                 │
+│ Workspace tree     │ Selected content                          │
+├────────────────────┴───────────────────────────────────────────┤
+│ Status and contextual information                              │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ## Project Explorer
 
 The explorer is always available in the desktop layout, resizable, and placeable on either side. Its side and width persist. It uses familiar tree expand/collapse and keyboard interactions for `Workspace → Project → App → optional Idea Group → Idea`. Contextual actions should eventually include create, rename, move, duplicate, archive, and properties.
+
+“Always available” does not require the explorer to consume permanent screen space at every width. Narrow layouts may collapse, overlay, or temporarily hide it, but a predictable visible control or keyboard action must restore it immediately. The explorer must never become permanently unavailable.
 
 ## Menus
 
@@ -33,11 +35,29 @@ Commands may be context-sensitive but remain predictable. Settings initially bel
 
 ## Toolbar
 
-Global candidates are New…, Save, Undo, Redo, Search, and zoom controls. New… adapts to context and may offer hierarchy items or Idea, Flowchart, Snippet, Document, and Task. Editing controls such as emphasis, headings, lists, checklist, code, quote, text size, and block insertion appear or enable only when relevant. Toolbar customization is future scope.
+Global candidates are New…, Save, Undo, Redo, Search, and zoom controls. New… adapts to context and may offer hierarchy items or Idea, Flowchart, Snippet, Document, and Task.
+
+Contextual text-editing controls may include:
+
+- Bold
+- Italic
+- Underline, if supported
+- Heading level
+- Bulleted and numbered lists
+- Checklist
+- Code block
+- Quote
+- Font controls, if supported
+- Text-size controls
+- Block insertion
+
+These controls must appear or become enabled only when they are relevant to the active content. Toolbar customization is future scope.
 
 ## Idea pinboard
 
-An App or Idea Group Ideas view supports contained internal windows or cards. They never float above unrelated operating-system windows. Planned actions include move, resize, front, internal pinning, collapse/restore, maximize within the work area, focused edit, duplicate, move, and archive.
+An App or Idea Group Ideas view supports contained internal windows or cards. Planned actions include move, resize, bring to front, collapse to the title bar, restore, minimize or collapse without losing content, maximize within the work area, focused edit, duplicate, move, and archive.
+
+Pinning or “always on top” applies only inside the devGarden work area. It may keep an Idea above other contained Idea windows, but must never place it above unrelated operating-system windows.
 
 Planned layout tools include saved positions and sizes, auto arrange, cascade, horizontal or vertical tile, fit all, reset, optional snap/grid/alignment guides, and pinned-only filtering. Pinboard layout is presentation state separate from Idea content.
 
@@ -51,6 +71,29 @@ Use sensible regions for Ready, contextual help, Saving/Saved, Loading, Searchin
 - **Medium:** narrower explorer and condensed toolbar; clear icons may replace labels.
 - **Narrow/portrait desktop:** explorer may collapse, overlay, or hide temporarily; contextual controls reorganize and the work area stays primary.
 
-Dark is the default theme, not the only theme. Plan for system/light themes, fonts, scale, density, accent, icon size, explorer placement and width, toolbar/status configuration, editor preferences, shortcuts, and motion preferences. Use minimal monochrome icons where practical and motion only for state or orientation.
+Dark is the default theme, not the only theme. Planned customization includes:
+
+- Dark, light, and system themes
+- Font family
+- Editor font
+- Code font
+- Font sizes
+- UI scale
+- Compact or comfortable density
+- Accent colour
+- Icon size
+- Explorer placement and width
+- Toolbar layout
+- Visible status-bar sections
+- Default landing context
+- Default Idea view
+- Slash-command suggestions
+- Markdown conversion preferences
+- Keyboard shortcuts
+- Mobile toolbar
+- Swipe actions
+- Motion preferences
+
+Use minimal monochrome icons where practical and motion only for state or orientation. Platform-specific preferences must remain separate from shared content.
 
 See [mobile UI](mobile-ui.md) and [keyboard and input](keyboard-and-input.md).
