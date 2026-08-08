@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/services/hierarchy_service.dart';
+import '../application/services/content_block_service.dart';
 import '../application/services/id_generator.dart';
 import '../application/services/idea_service.dart';
 import '../application/services/idea_group_service.dart';
@@ -26,6 +27,9 @@ final ideaRepositoryProvider = Provider<IdeaRepository>(
 );
 final ideaGroupRepositoryProvider = Provider<IdeaGroupRepository>(
   (ref) => DriftIdeaGroupRepository(ref.watch(databaseProvider)),
+);
+final contentBlockRepositoryProvider = Provider<ContentBlockRepository>(
+  (ref) => DriftContentBlockRepository(ref.watch(databaseProvider)),
 );
 
 final idGeneratorProvider = Provider<IdGenerator>(
@@ -54,6 +58,15 @@ final ideaServiceProvider = Provider<IdeaService>(
 final ideaGroupServiceProvider = Provider<IdeaGroupService>(
   (ref) => IdeaGroupService(
     ref.watch(ideaGroupRepositoryProvider),
+    ref.watch(ideaRepositoryProvider),
+    ref.watch(idGeneratorProvider),
+    ref.watch(clockProvider),
+  ),
+);
+
+final contentBlockServiceProvider = Provider<ContentBlockService>(
+  (ref) => ContentBlockService(
+    ref.watch(contentBlockRepositoryProvider),
     ref.watch(ideaRepositoryProvider),
     ref.watch(idGeneratorProvider),
     ref.watch(clockProvider),

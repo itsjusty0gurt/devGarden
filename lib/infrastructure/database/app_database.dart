@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:uuid/uuid.dart';
 
 import 'database_path.dart';
 
@@ -86,7 +87,27 @@ class Ideas extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Workspaces, Projects, Apps, IdeaGroups, Ideas])
+@DataClassName('ContentBlockRow')
+class ContentBlocks extends Table {
+  TextColumn get id => text()();
+  TextColumn get ideaId =>
+      text().references(Ideas, #id, onDelete: KeyAction.restrict)();
+  TextColumn get type => text()();
+  IntColumn get sortOrder => integer()();
+  TextColumn get textContent => text()();
+  TextColumn get metadataJson => text().withDefault(const Constant('{}'))();
+  IntColumn get payloadVersion => integer().withDefault(const Constant(1))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DriftDatabase(
+  tables: [Workspaces, Projects, Apps, IdeaGroups, Ideas, ContentBlocks],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
@@ -101,7 +122,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -110,6 +131,35 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await migrator.createTable(ideaGroups);
         await migrator.addColumn(ideas, ideas.groupId);
+      }
+      if (from < 3) {
+        await migrator.createTable(contentBlocks);
+        final legacyIdeas = await customSelect(
+          'SELECT id, body, created_at, updated_at FROM ideas '
+          "WHERE body <> ''",
+        ).get();
+        await batch((batch) {
+          for (final row in legacyIdeas) {
+            batch.insert(
+              contentBlocks,
+              ContentBlocksCompanion.insert(
+                id: const Uuid().v7(),
+                ideaId: row.read<String>('id'),
+                type: 'paragraph',
+                sortOrder: 0,
+                textContent: row.read<String>('body'),
+                createdAt: DateTime.fromMillisecondsSinceEpoch(
+                  row.read<int>('created_at') * 1000,
+                  isUtc: true,
+                ),
+                updatedAt: DateTime.fromMillisecondsSinceEpoch(
+                  row.read<int>('updated_at') * 1000,
+                  isUtc: true,
+                ),
+              ),
+            );
+          }
+        });
       }
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),

@@ -2463,6 +2463,625 @@ class IdeasCompanion extends UpdateCompanion<IdeaRow> {
   }
 }
 
+class $ContentBlocksTable extends ContentBlocks
+    with TableInfo<$ContentBlocksTable, ContentBlockRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContentBlocksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ideaIdMeta = const VerificationMeta('ideaId');
+  @override
+  late final GeneratedColumn<String> ideaId = GeneratedColumn<String>(
+    'idea_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES ideas (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _textContentMeta = const VerificationMeta(
+    'textContent',
+  );
+  @override
+  late final GeneratedColumn<String> textContent = GeneratedColumn<String>(
+    'text_content',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _metadataJsonMeta = const VerificationMeta(
+    'metadataJson',
+  );
+  @override
+  late final GeneratedColumn<String> metadataJson = GeneratedColumn<String>(
+    'metadata_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  );
+  static const VerificationMeta _payloadVersionMeta = const VerificationMeta(
+    'payloadVersion',
+  );
+  @override
+  late final GeneratedColumn<int> payloadVersion = GeneratedColumn<int>(
+    'payload_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ideaId,
+    type,
+    sortOrder,
+    textContent,
+    metadataJson,
+    payloadVersion,
+    createdAt,
+    updatedAt,
+    isDeleted,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'content_blocks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ContentBlockRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('idea_id')) {
+      context.handle(
+        _ideaIdMeta,
+        ideaId.isAcceptableOrUnknown(data['idea_id']!, _ideaIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ideaIdMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    if (data.containsKey('text_content')) {
+      context.handle(
+        _textContentMeta,
+        textContent.isAcceptableOrUnknown(
+          data['text_content']!,
+          _textContentMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_textContentMeta);
+    }
+    if (data.containsKey('metadata_json')) {
+      context.handle(
+        _metadataJsonMeta,
+        metadataJson.isAcceptableOrUnknown(
+          data['metadata_json']!,
+          _metadataJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payload_version')) {
+      context.handle(
+        _payloadVersionMeta,
+        payloadVersion.isAcceptableOrUnknown(
+          data['payload_version']!,
+          _payloadVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ContentBlockRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ContentBlockRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ideaId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}idea_id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      textContent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}text_content'],
+      )!,
+      metadataJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata_json'],
+      )!,
+      payloadVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}payload_version'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+    );
+  }
+
+  @override
+  $ContentBlocksTable createAlias(String alias) {
+    return $ContentBlocksTable(attachedDatabase, alias);
+  }
+}
+
+class ContentBlockRow extends DataClass implements Insertable<ContentBlockRow> {
+  final String id;
+  final String ideaId;
+  final String type;
+  final int sortOrder;
+  final String textContent;
+  final String metadataJson;
+  final int payloadVersion;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isDeleted;
+  const ContentBlockRow({
+    required this.id,
+    required this.ideaId,
+    required this.type,
+    required this.sortOrder,
+    required this.textContent,
+    required this.metadataJson,
+    required this.payloadVersion,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isDeleted,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['idea_id'] = Variable<String>(ideaId);
+    map['type'] = Variable<String>(type);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['text_content'] = Variable<String>(textContent);
+    map['metadata_json'] = Variable<String>(metadataJson);
+    map['payload_version'] = Variable<int>(payloadVersion);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    return map;
+  }
+
+  ContentBlocksCompanion toCompanion(bool nullToAbsent) {
+    return ContentBlocksCompanion(
+      id: Value(id),
+      ideaId: Value(ideaId),
+      type: Value(type),
+      sortOrder: Value(sortOrder),
+      textContent: Value(textContent),
+      metadataJson: Value(metadataJson),
+      payloadVersion: Value(payloadVersion),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      isDeleted: Value(isDeleted),
+    );
+  }
+
+  factory ContentBlockRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ContentBlockRow(
+      id: serializer.fromJson<String>(json['id']),
+      ideaId: serializer.fromJson<String>(json['ideaId']),
+      type: serializer.fromJson<String>(json['type']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      textContent: serializer.fromJson<String>(json['textContent']),
+      metadataJson: serializer.fromJson<String>(json['metadataJson']),
+      payloadVersion: serializer.fromJson<int>(json['payloadVersion']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ideaId': serializer.toJson<String>(ideaId),
+      'type': serializer.toJson<String>(type),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'textContent': serializer.toJson<String>(textContent),
+      'metadataJson': serializer.toJson<String>(metadataJson),
+      'payloadVersion': serializer.toJson<int>(payloadVersion),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+    };
+  }
+
+  ContentBlockRow copyWith({
+    String? id,
+    String? ideaId,
+    String? type,
+    int? sortOrder,
+    String? textContent,
+    String? metadataJson,
+    int? payloadVersion,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isDeleted,
+  }) => ContentBlockRow(
+    id: id ?? this.id,
+    ideaId: ideaId ?? this.ideaId,
+    type: type ?? this.type,
+    sortOrder: sortOrder ?? this.sortOrder,
+    textContent: textContent ?? this.textContent,
+    metadataJson: metadataJson ?? this.metadataJson,
+    payloadVersion: payloadVersion ?? this.payloadVersion,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isDeleted: isDeleted ?? this.isDeleted,
+  );
+  ContentBlockRow copyWithCompanion(ContentBlocksCompanion data) {
+    return ContentBlockRow(
+      id: data.id.present ? data.id.value : this.id,
+      ideaId: data.ideaId.present ? data.ideaId.value : this.ideaId,
+      type: data.type.present ? data.type.value : this.type,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      textContent: data.textContent.present
+          ? data.textContent.value
+          : this.textContent,
+      metadataJson: data.metadataJson.present
+          ? data.metadataJson.value
+          : this.metadataJson,
+      payloadVersion: data.payloadVersion.present
+          ? data.payloadVersion.value
+          : this.payloadVersion,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContentBlockRow(')
+          ..write('id: $id, ')
+          ..write('ideaId: $ideaId, ')
+          ..write('type: $type, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('textContent: $textContent, ')
+          ..write('metadataJson: $metadataJson, ')
+          ..write('payloadVersion: $payloadVersion, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ideaId,
+    type,
+    sortOrder,
+    textContent,
+    metadataJson,
+    payloadVersion,
+    createdAt,
+    updatedAt,
+    isDeleted,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ContentBlockRow &&
+          other.id == this.id &&
+          other.ideaId == this.ideaId &&
+          other.type == this.type &&
+          other.sortOrder == this.sortOrder &&
+          other.textContent == this.textContent &&
+          other.metadataJson == this.metadataJson &&
+          other.payloadVersion == this.payloadVersion &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isDeleted == this.isDeleted);
+}
+
+class ContentBlocksCompanion extends UpdateCompanion<ContentBlockRow> {
+  final Value<String> id;
+  final Value<String> ideaId;
+  final Value<String> type;
+  final Value<int> sortOrder;
+  final Value<String> textContent;
+  final Value<String> metadataJson;
+  final Value<int> payloadVersion;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isDeleted;
+  final Value<int> rowid;
+  const ContentBlocksCompanion({
+    this.id = const Value.absent(),
+    this.ideaId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.textContent = const Value.absent(),
+    this.metadataJson = const Value.absent(),
+    this.payloadVersion = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ContentBlocksCompanion.insert({
+    required String id,
+    required String ideaId,
+    required String type,
+    required int sortOrder,
+    required String textContent,
+    this.metadataJson = const Value.absent(),
+    this.payloadVersion = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       ideaId = Value(ideaId),
+       type = Value(type),
+       sortOrder = Value(sortOrder),
+       textContent = Value(textContent),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<ContentBlockRow> custom({
+    Expression<String>? id,
+    Expression<String>? ideaId,
+    Expression<String>? type,
+    Expression<int>? sortOrder,
+    Expression<String>? textContent,
+    Expression<String>? metadataJson,
+    Expression<int>? payloadVersion,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDeleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ideaId != null) 'idea_id': ideaId,
+      if (type != null) 'type': type,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (textContent != null) 'text_content': textContent,
+      if (metadataJson != null) 'metadata_json': metadataJson,
+      if (payloadVersion != null) 'payload_version': payloadVersion,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ContentBlocksCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ideaId,
+    Value<String>? type,
+    Value<int>? sortOrder,
+    Value<String>? textContent,
+    Value<String>? metadataJson,
+    Value<int>? payloadVersion,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isDeleted,
+    Value<int>? rowid,
+  }) {
+    return ContentBlocksCompanion(
+      id: id ?? this.id,
+      ideaId: ideaId ?? this.ideaId,
+      type: type ?? this.type,
+      sortOrder: sortOrder ?? this.sortOrder,
+      textContent: textContent ?? this.textContent,
+      metadataJson: metadataJson ?? this.metadataJson,
+      payloadVersion: payloadVersion ?? this.payloadVersion,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ideaId.present) {
+      map['idea_id'] = Variable<String>(ideaId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (textContent.present) {
+      map['text_content'] = Variable<String>(textContent.value);
+    }
+    if (metadataJson.present) {
+      map['metadata_json'] = Variable<String>(metadataJson.value);
+    }
+    if (payloadVersion.present) {
+      map['payload_version'] = Variable<int>(payloadVersion.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContentBlocksCompanion(')
+          ..write('id: $id, ')
+          ..write('ideaId: $ideaId, ')
+          ..write('type: $type, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('textContent: $textContent, ')
+          ..write('metadataJson: $metadataJson, ')
+          ..write('payloadVersion: $payloadVersion, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2471,6 +3090,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AppsTable apps = $AppsTable(this);
   late final $IdeaGroupsTable ideaGroups = $IdeaGroupsTable(this);
   late final $IdeasTable ideas = $IdeasTable(this);
+  late final $ContentBlocksTable contentBlocks = $ContentBlocksTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2481,6 +3101,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     apps,
     ideaGroups,
     ideas,
+    contentBlocks,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -4299,6 +4920,24 @@ final class $$IdeasTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$ContentBlocksTable, List<ContentBlockRow>>
+  _contentBlocksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.contentBlocks,
+    aliasName: 'ideas__id__content_blocks__idea_id',
+  );
+
+  $$ContentBlocksTableProcessedTableManager get contentBlocksRefs {
+    final manager = $$ContentBlocksTableTableManager(
+      $_db,
+      $_db.contentBlocks,
+    ).filter((f) => f.ideaId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_contentBlocksRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$IdeasTableFilterComposer extends Composer<_$AppDatabase, $IdeasTable> {
@@ -4398,6 +5037,31 @@ class $$IdeasTableFilterComposer extends Composer<_$AppDatabase, $IdeasTable> {
           ),
     );
     return composer;
+  }
+
+  Expression<bool> contentBlocksRefs(
+    Expression<bool> Function($$ContentBlocksTableFilterComposer f) f,
+  ) {
+    final $$ContentBlocksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contentBlocks,
+      getReferencedColumn: (t) => t.ideaId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContentBlocksTableFilterComposer(
+            $db: $db,
+            $table: $db.contentBlocks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -4583,6 +5247,31 @@ class $$IdeasTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> contentBlocksRefs<T extends Object>(
+    Expression<T> Function($$ContentBlocksTableAnnotationComposer a) f,
+  ) {
+    final $$ContentBlocksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contentBlocks,
+      getReferencedColumn: (t) => t.ideaId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContentBlocksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contentBlocks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$IdeasTableTableManager
@@ -4598,7 +5287,11 @@ class $$IdeasTableTableManager
           $$IdeasTableUpdateCompanionBuilder,
           (IdeaRow, $$IdeasTableReferences),
           IdeaRow,
-          PrefetchHooks Function({bool appId, bool groupId})
+          PrefetchHooks Function({
+            bool appId,
+            bool groupId,
+            bool contentBlocksRefs,
+          })
         > {
   $$IdeasTableTableManager(_$AppDatabase db, $IdeasTable table)
     : super(
@@ -4673,7 +5366,468 @@ class $$IdeasTableTableManager
                     (e.readTable(table), $$IdeasTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({appId = false, groupId = false}) {
+          prefetchHooksCallback:
+              ({appId = false, groupId = false, contentBlocksRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (contentBlocksRefs) db.contentBlocks,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (appId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.appId,
+                                    referencedTable: $$IdeasTableReferences
+                                        ._appIdTable(db),
+                                    referencedColumn: $$IdeasTableReferences
+                                        ._appIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+                        if (groupId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.groupId,
+                                    referencedTable: $$IdeasTableReferences
+                                        ._groupIdTable(db),
+                                    referencedColumn: $$IdeasTableReferences
+                                        ._groupIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (contentBlocksRefs)
+                        await $_getPrefetchedData<
+                          IdeaRow,
+                          $IdeasTable,
+                          ContentBlockRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$IdeasTableReferences
+                              ._contentBlocksRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$IdeasTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).contentBlocksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.ideaId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$IdeasTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $IdeasTable,
+      IdeaRow,
+      $$IdeasTableFilterComposer,
+      $$IdeasTableOrderingComposer,
+      $$IdeasTableAnnotationComposer,
+      $$IdeasTableCreateCompanionBuilder,
+      $$IdeasTableUpdateCompanionBuilder,
+      (IdeaRow, $$IdeasTableReferences),
+      IdeaRow,
+      PrefetchHooks Function({bool appId, bool groupId, bool contentBlocksRefs})
+    >;
+typedef $$ContentBlocksTableCreateCompanionBuilder =
+    ContentBlocksCompanion Function({
+      required String id,
+      required String ideaId,
+      required String type,
+      required int sortOrder,
+      required String textContent,
+      Value<String> metadataJson,
+      Value<int> payloadVersion,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+typedef $$ContentBlocksTableUpdateCompanionBuilder =
+    ContentBlocksCompanion Function({
+      Value<String> id,
+      Value<String> ideaId,
+      Value<String> type,
+      Value<int> sortOrder,
+      Value<String> textContent,
+      Value<String> metadataJson,
+      Value<int> payloadVersion,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+
+final class $$ContentBlocksTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $ContentBlocksTable, ContentBlockRow> {
+  $$ContentBlocksTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $IdeasTable _ideaIdTable(_$AppDatabase db) =>
+      db.ideas.createAlias('content_blocks__idea_id__ideas__id');
+
+  $$IdeasTableProcessedTableManager get ideaId {
+    final $_column = $_itemColumn<String>('idea_id')!;
+
+    final manager = $$IdeasTableTableManager(
+      $_db,
+      $_db.ideas,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_ideaIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ContentBlocksTableFilterComposer
+    extends Composer<_$AppDatabase, $ContentBlocksTable> {
+  $$ContentBlocksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get textContent => $composableBuilder(
+    column: $table.textContent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metadataJson => $composableBuilder(
+    column: $table.metadataJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get payloadVersion => $composableBuilder(
+    column: $table.payloadVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$IdeasTableFilterComposer get ideaId {
+    final $$IdeasTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ideaId,
+      referencedTable: $db.ideas,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeasTableFilterComposer(
+            $db: $db,
+            $table: $db.ideas,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContentBlocksTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContentBlocksTable> {
+  $$ContentBlocksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get textContent => $composableBuilder(
+    column: $table.textContent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metadataJson => $composableBuilder(
+    column: $table.metadataJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get payloadVersion => $composableBuilder(
+    column: $table.payloadVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$IdeasTableOrderingComposer get ideaId {
+    final $$IdeasTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ideaId,
+      referencedTable: $db.ideas,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeasTableOrderingComposer(
+            $db: $db,
+            $table: $db.ideas,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContentBlocksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContentBlocksTable> {
+  $$ContentBlocksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<String> get textContent => $composableBuilder(
+    column: $table.textContent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get metadataJson => $composableBuilder(
+    column: $table.metadataJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get payloadVersion => $composableBuilder(
+    column: $table.payloadVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  $$IdeasTableAnnotationComposer get ideaId {
+    final $$IdeasTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.ideaId,
+      referencedTable: $db.ideas,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeasTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ideas,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContentBlocksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ContentBlocksTable,
+          ContentBlockRow,
+          $$ContentBlocksTableFilterComposer,
+          $$ContentBlocksTableOrderingComposer,
+          $$ContentBlocksTableAnnotationComposer,
+          $$ContentBlocksTableCreateCompanionBuilder,
+          $$ContentBlocksTableUpdateCompanionBuilder,
+          (ContentBlockRow, $$ContentBlocksTableReferences),
+          ContentBlockRow,
+          PrefetchHooks Function({bool ideaId})
+        > {
+  $$ContentBlocksTableTableManager(_$AppDatabase db, $ContentBlocksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ContentBlocksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ContentBlocksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ContentBlocksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ideaId = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<String> textContent = const Value.absent(),
+                Value<String> metadataJson = const Value.absent(),
+                Value<int> payloadVersion = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContentBlocksCompanion(
+                id: id,
+                ideaId: ideaId,
+                type: type,
+                sortOrder: sortOrder,
+                textContent: textContent,
+                metadataJson: metadataJson,
+                payloadVersion: payloadVersion,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String ideaId,
+                required String type,
+                required int sortOrder,
+                required String textContent,
+                Value<String> metadataJson = const Value.absent(),
+                Value<int> payloadVersion = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContentBlocksCompanion.insert(
+                id: id,
+                ideaId: ideaId,
+                type: type,
+                sortOrder: sortOrder,
+                textContent: textContent,
+                metadataJson: metadataJson,
+                payloadVersion: payloadVersion,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ContentBlocksTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({ideaId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -4693,28 +5847,15 @@ class $$IdeasTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (appId) {
+                    if (ideaId) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.appId,
-                                referencedTable: $$IdeasTableReferences
-                                    ._appIdTable(db),
-                                referencedColumn: $$IdeasTableReferences
-                                    ._appIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-                    if (groupId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.groupId,
-                                referencedTable: $$IdeasTableReferences
-                                    ._groupIdTable(db),
-                                referencedColumn: $$IdeasTableReferences
-                                    ._groupIdTable(db)
+                                currentColumn: table.ideaId,
+                                referencedTable: $$ContentBlocksTableReferences
+                                    ._ideaIdTable(db),
+                                referencedColumn: $$ContentBlocksTableReferences
+                                    ._ideaIdTable(db)
                                     .id,
                               )
                               as T;
@@ -4731,19 +5872,19 @@ class $$IdeasTableTableManager
       );
 }
 
-typedef $$IdeasTableProcessedTableManager =
+typedef $$ContentBlocksTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $IdeasTable,
-      IdeaRow,
-      $$IdeasTableFilterComposer,
-      $$IdeasTableOrderingComposer,
-      $$IdeasTableAnnotationComposer,
-      $$IdeasTableCreateCompanionBuilder,
-      $$IdeasTableUpdateCompanionBuilder,
-      (IdeaRow, $$IdeasTableReferences),
-      IdeaRow,
-      PrefetchHooks Function({bool appId, bool groupId})
+      $ContentBlocksTable,
+      ContentBlockRow,
+      $$ContentBlocksTableFilterComposer,
+      $$ContentBlocksTableOrderingComposer,
+      $$ContentBlocksTableAnnotationComposer,
+      $$ContentBlocksTableCreateCompanionBuilder,
+      $$ContentBlocksTableUpdateCompanionBuilder,
+      (ContentBlockRow, $$ContentBlocksTableReferences),
+      ContentBlockRow,
+      PrefetchHooks Function({bool ideaId})
     >;
 
 class $AppDatabaseManager {
@@ -4758,4 +5899,6 @@ class $AppDatabaseManager {
       $$IdeaGroupsTableTableManager(_db, _db.ideaGroups);
   $$IdeasTableTableManager get ideas =>
       $$IdeasTableTableManager(_db, _db.ideas);
+  $$ContentBlocksTableTableManager get contentBlocks =>
+      $$ContentBlocksTableTableManager(_db, _db.contentBlocks);
 }

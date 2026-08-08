@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/models/entities.dart';
+import 'content_block_controller.dart';
+import 'content_block_editor.dart';
 import 'idea_controller.dart';
 
 class IdeaEditorView extends ConsumerStatefulWidget {
@@ -18,18 +20,19 @@ class IdeaEditorView extends ConsumerStatefulWidget {
 
 class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
   final _titleController = TextEditingController();
-  final _bodyController = TextEditingController();
-  final _bodyFocus = FocusNode();
   late final IdeaController _ideaController;
+  late final ContentBlockController _blockController;
   String? _loadedIdeaId;
 
   @override
   void initState() {
     super.initState();
     _ideaController = ref.read(ideaControllerProvider.notifier);
+    _blockController = ref.read(contentBlockControllerProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_ideaController.open(EntityId(widget.ideaId)));
-      _bodyFocus.requestFocus();
+      final id = EntityId(widget.ideaId);
+      unawaited(_ideaController.open(id));
+      unawaited(_blockController.openIdea(id));
     });
   }
 
@@ -42,10 +45,6 @@ class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
     if (current?.id.value == widget.ideaId && _loadedIdeaId != widget.ideaId) {
       _loadedIdeaId = widget.ideaId;
       _titleController.text = state.draftTitle;
-      _bodyController.text = state.draftBody;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _bodyFocus.requestFocus();
-      });
     }
 
     if (current?.id.value != widget.ideaId) {
@@ -78,7 +77,7 @@ class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
                     border: InputBorder.none,
                   ),
                   style: Theme.of(context).textTheme.headlineSmall,
-                  onChanged: (_) => _draftChanged(controller),
+                  onChanged: controller.updateDraftTitle,
                 ),
               ),
               IconButton(
@@ -102,32 +101,9 @@ class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
             ),
             const SizedBox(height: 8),
           ],
-          Expanded(
-            child: TextField(
-              key: const Key('idea-body-field'),
-              controller: _bodyController,
-              focusNode: _bodyFocus,
-              autofocus: true,
-              expands: true,
-              maxLines: null,
-              minLines: null,
-              textAlignVertical: TextAlignVertical.top,
-              decoration: const InputDecoration(
-                hintText: 'Start writing…',
-                alignLabelWithHint: true,
-              ),
-              onChanged: (_) => _draftChanged(controller),
-            ),
-          ),
+          Expanded(child: ContentBlockEditor(ideaId: current!.id)),
         ],
       ),
-    );
-  }
-
-  void _draftChanged(IdeaController controller) {
-    controller.updateDraft(
-      title: _titleController.text,
-      body: _bodyController.text,
     );
   }
 
@@ -135,7 +111,7 @@ class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
     BuildContext context,
     IdeaController controller,
   ) async {
-    await controller.flush();
+    await Future.wait([controller.flush(), _blockController.flush()]);
     if (context.mounted) context.go('/app');
   }
 
@@ -164,6 +140,7 @@ class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
       ),
     );
     if (confirmed == true) {
+      await _blockController.flush();
       await controller.softDelete(idea.id);
       if (context.mounted) context.go('/app');
     }
@@ -172,9 +149,8 @@ class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
   @override
   void dispose() {
     unawaited(_ideaController.flush());
+    unawaited(_blockController.flush());
     _titleController.dispose();
-    _bodyController.dispose();
-    _bodyFocus.dispose();
     super.dispose();
   }
 }

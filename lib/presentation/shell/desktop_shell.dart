@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/preferences/shell_preferences.dart';
+import '../garden/content_block_controller.dart';
 import '../garden/hierarchy_controller.dart';
 import '../garden/idea_controller.dart';
+import '../garden/idea_group_controller.dart';
 import 'project_explorer.dart';
 import 'shell_controller.dart';
 import 'shell_menu_bar.dart';
@@ -32,6 +34,7 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
   Widget build(BuildContext context) {
     final shellState = ref.watch(shellControllerProvider);
     final ideaState = ref.watch(ideaControllerProvider);
+    final blockState = ref.watch(contentBlockControllerProvider);
 
     return CallbackShortcuts(
       bindings: {
@@ -99,7 +102,10 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
                 ),
                 const Divider(height: 1),
                 ShellStatusBar(
-                  message: ideaState.statusMessage ?? shellState.statusMessage,
+                  message:
+                      blockState.statusMessage ??
+                      ideaState.statusMessage ??
+                      shellState.statusMessage,
                 ),
               ],
             ),
@@ -247,7 +253,7 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
   Future<void> _showFindInProject() => _showMessageDialog(
     title: 'Find in Project',
     message:
-        'Use the Ideas search field for title and body search in the current App.',
+        'Use the Ideas search field for title and block-content search in the current App.',
   );
 
   Future<void> _showAbout() => _showMessageDialog(
@@ -287,7 +293,12 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
       return;
     }
     try {
+      await Future.wait([
+        ref.read(ideaControllerProvider.notifier).flush(),
+        ref.read(contentBlockControllerProvider.notifier).flush(),
+      ]);
       final idea = await ref.read(ideaControllerProvider.notifier).capture();
+      ref.read(ideaGroupControllerProvider.notifier).showUngrouped();
       if (mounted) context.go('/idea/${idea.id.value}');
     } catch (_) {
       _controller.setStatus('Idea creation failed.');
@@ -303,7 +314,10 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
       _controller.saveUnavailable();
       return;
     }
-    await ref.read(ideaControllerProvider.notifier).flush();
+    await Future.wait([
+      ref.read(ideaControllerProvider.notifier).flush(),
+      ref.read(contentBlockControllerProvider.notifier).flush(),
+    ]);
   }
 
   String _themeModeLabel(ThemeMode mode) {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../../domain/models/entities.dart' as domain;
@@ -303,31 +305,37 @@ class DriftIdeaRepository implements IdeaRepository {
   @override
   Future<List<domain.Idea>> search(domain.EntityId appId, String query) async {
     final pattern = '%${_escapeLike(query)}%';
-    final select = _activeIdeaQuery(appId)
-      ..where(
-        (row) =>
-            row.title.like(pattern, escapeChar: r'\') |
-            row.body.like(pattern, escapeChar: r'\'),
-      );
-    return (await select.get()).map(_idea).toList();
+    final rows = await _database
+        .customSelect(
+          r'''SELECT DISTINCT i.*
+          FROM ideas AS i
+          LEFT JOIN content_blocks AS b
+            ON b.idea_id = i.id AND b.is_deleted = 0
+          WHERE i.app_id = ? AND i.is_deleted = 0
+            AND (i.title LIKE ? ESCAPE '\' OR b.text_content LIKE ? ESCAPE '\')
+          ORDER BY i.updated_at DESC''',
+          variables: [
+            Variable.withString(appId.value),
+            Variable.withString(pattern),
+            Variable.withString(pattern),
+          ],
+          readsFrom: {_database.ideas, _database.contentBlocks},
+        )
+        .get();
+    return rows.map((row) => _idea(_database.ideas.map(row.data))).toList();
   }
 
   @override
-  Future<domain.Idea> updateContent({
+  Future<domain.Idea> updateTitle({
     required domain.EntityId id,
     required String title,
-    required String body,
     required DateTime updatedAt,
   }) async {
     final changed =
         await (_database.update(
           _database.ideas,
         )..where((row) => row.id.equals(id.value))).write(
-          IdeasCompanion(
-            title: Value(title),
-            body: Value(body),
-            updatedAt: Value(updatedAt),
-          ),
+          IdeasCompanion(title: Value(title), updatedAt: Value(updatedAt)),
         );
     if (changed != 1) {
       throw StateError('The Idea could not be updated.');
@@ -373,6 +381,125 @@ class DriftIdeaRepository implements IdeaRepository {
         .replaceAll(r'\', r'\\')
         .replaceAll('%', r'\%')
         .replaceAll('_', r'\_');
+  }
+}
+
+class DriftContentBlockRepository implements ContentBlockRepository {
+  const DriftContentBlockRepository(this._database);
+
+  final AppDatabase _database;
+
+  @override
+  Future<domain.ContentBlock> create(domain.ContentBlock block) async {
+    await _database
+        .into(_database.contentBlocks)
+        .insert(
+          ContentBlocksCompanion(
+            id: Value(block.id.value),
+            ideaId: Value(block.ideaId.value),
+            type: Value(block.type.name),
+            sortOrder: Value(block.sortOrder),
+            textContent: Value(block.text),
+            metadataJson: Value(jsonEncode(block.metadata)),
+            payloadVersion: Value(block.payloadVersion),
+            createdAt: Value(block.createdAt),
+            updatedAt: Value(block.updatedAt),
+            isDeleted: Value(block.isDeleted),
+          ),
+        );
+    return block;
+  }
+
+  @override
+  Future<domain.ContentBlock?> getById(domain.EntityId id) async {
+    final query = _database.select(_database.contentBlocks)
+      ..where((row) => row.id.equals(id.value));
+    final row = await query.getSingleOrNull();
+    return row == null ? null : _contentBlock(row);
+  }
+
+  @override
+  Future<List<domain.ContentBlock>> listActiveByIdea(
+    domain.EntityId ideaId,
+  ) async {
+    final query = _database.select(_database.contentBlocks)
+      ..where(
+        (row) => row.ideaId.equals(ideaId.value) & row.isDeleted.equals(false),
+      )
+      ..orderBy([
+        (row) => OrderingTerm(expression: row.sortOrder),
+        (row) => OrderingTerm(expression: row.createdAt),
+      ]);
+    return (await query.get()).map(_contentBlock).toList();
+  }
+
+  @override
+  Future<domain.ContentBlock> update({
+    required domain.EntityId id,
+    required domain.ContentBlockType type,
+    required String text,
+    required Map<String, Object?> metadata,
+    required DateTime updatedAt,
+  }) async {
+    final changed =
+        await (_database.update(
+          _database.contentBlocks,
+        )..where((row) => row.id.equals(id.value))).write(
+          ContentBlocksCompanion(
+            type: Value(type.name),
+            textContent: Value(text),
+            metadataJson: Value(jsonEncode(metadata)),
+            updatedAt: Value(updatedAt),
+          ),
+        );
+    if (changed != 1) throw StateError('The block could not be updated.');
+    final updated = await getById(id);
+    if (updated == null) throw StateError('The block could not be reloaded.');
+    return updated;
+  }
+
+  @override
+  Future<void> reorder({
+    required domain.EntityId ideaId,
+    required List<domain.EntityId> orderedIds,
+    required DateTime updatedAt,
+  }) {
+    return _database.transaction(() async {
+      final active = await listActiveByIdea(ideaId);
+      final activeIds = active.map((block) => block.id).toSet();
+      if (orderedIds.length != activeIds.length ||
+          !activeIds.containsAll(orderedIds)) {
+        throw StateError('The block order is incomplete or invalid.');
+      }
+      for (var index = 0; index < orderedIds.length; index++) {
+        await (_database.update(_database.contentBlocks)..where(
+              (row) =>
+                  row.id.equals(orderedIds[index].value) &
+                  row.ideaId.equals(ideaId.value) &
+                  row.isDeleted.equals(false),
+            ))
+            .write(
+              ContentBlocksCompanion(
+                sortOrder: Value(index),
+                updatedAt: Value(updatedAt),
+              ),
+            );
+      }
+    });
+  }
+
+  @override
+  Future<void> softDelete(domain.EntityId id, DateTime updatedAt) async {
+    final changed =
+        await (_database.update(
+          _database.contentBlocks,
+        )..where((row) => row.id.equals(id.value))).write(
+          ContentBlocksCompanion(
+            isDeleted: const Value(true),
+            updatedAt: Value(updatedAt),
+          ),
+        );
+    if (changed != 1) throw StateError('The block could not be deleted.');
   }
 }
 
@@ -428,3 +555,19 @@ domain.Idea _idea(IdeaRow row) => domain.Idea(
   isPinned: row.isPinned,
   isDeleted: row.isDeleted,
 );
+
+domain.ContentBlock _contentBlock(ContentBlockRow row) {
+  final decoded = jsonDecode(row.metadataJson);
+  return domain.ContentBlock(
+    id: domain.EntityId(row.id),
+    ideaId: domain.EntityId(row.ideaId),
+    type: domain.ContentBlockType.values.byName(row.type),
+    sortOrder: row.sortOrder,
+    text: row.textContent,
+    metadata: decoded is Map<String, Object?> ? decoded : const {},
+    payloadVersion: row.payloadVersion,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    isDeleted: row.isDeleted,
+  );
+}

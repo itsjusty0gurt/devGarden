@@ -30,13 +30,12 @@ void main() {
 
     await controller.selectApp(appId);
     await controller.capture();
-    controller.updateDraft(title: 'Unsaved title', body: 'Unsaved body');
+    controller.updateDraftTitle('Unsaved title');
     await controller.flush();
 
     expect(controller.state.saveState, IdeaSaveState.failed);
     expect(controller.state.isDirty, isTrue);
     expect(controller.state.draftTitle, 'Unsaved title');
-    expect(controller.state.draftBody, 'Unsaved body');
     expect(
       controller.state.errorMessage,
       'Your changes could not be saved. They remain in the editor.',
@@ -80,10 +79,9 @@ class _FailingUpdateRepository implements IdeaRepository {
   Future<void> softDelete(EntityId id, DateTime updatedAt) async {}
 
   @override
-  Future<Idea> updateContent({
+  Future<Idea> updateTitle({
     required EntityId id,
     required String title,
-    required String body,
     required DateTime updatedAt,
   }) {
     throw const FileSystemExceptionForTest();

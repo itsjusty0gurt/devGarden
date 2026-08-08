@@ -34,12 +34,30 @@ abstract interface class IdeaRepository {
     required EntityId? groupId,
     required DateTime updatedAt,
   });
-  Future<Idea> updateContent({
+  Future<Idea> updateTitle({
     required EntityId id,
     required String title,
-    required String body,
     required DateTime updatedAt,
   });
   Future<void> softDelete(EntityId id, DateTime updatedAt);
   Future<List<Idea>> search(EntityId appId, String query);
+}
+
+abstract interface class ContentBlockRepository {
+  Future<ContentBlock> create(ContentBlock block);
+  Future<ContentBlock?> getById(EntityId id);
+  Future<List<ContentBlock>> listActiveByIdea(EntityId ideaId);
+  Future<ContentBlock> update({
+    required EntityId id,
+    required ContentBlockType type,
+    required String text,
+    required Map<String, Object?> metadata,
+    required DateTime updatedAt,
+  });
+  Future<void> reorder({
+    required EntityId ideaId,
+    required List<EntityId> orderedIds,
+    required DateTime updatedAt,
+  });
+  Future<void> softDelete(EntityId id, DateTime updatedAt);
 }

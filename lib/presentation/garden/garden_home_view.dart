@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/models/entities.dart';
+import 'content_block_controller.dart';
 import 'hierarchy_controller.dart';
 import 'idea_controller.dart';
 import 'idea_group_controller.dart';
@@ -174,10 +175,15 @@ class _IdeasView extends ConsumerWidget {
                       groups: groupState.groups,
                       onOpen: () =>
                           context.go('/idea/${visibleIdeas[index].id.value}'),
-                      onMove: (groupId) => controller.moveToGroup(
-                        visibleIdeas[index].id,
-                        groupId,
-                      ),
+                      onMove: (groupId) async {
+                        await ref
+                            .read(contentBlockControllerProvider.notifier)
+                            .flush();
+                        await controller.moveToGroup(
+                          visibleIdeas[index].id,
+                          groupId,
+                        );
+                      },
                       onArchive: () => _confirmArchive(
                         context,
                         controller,

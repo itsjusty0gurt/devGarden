@@ -18,7 +18,6 @@ class IdeaState {
     this.ideas = const [],
     this.current,
     this.draftTitle = '',
-    this.draftBody = '',
     this.searchQuery = '',
     this.saveState = IdeaSaveState.idle,
     this.isLoading = false,
@@ -31,7 +30,6 @@ class IdeaState {
   final List<Idea> ideas;
   final Idea? current;
   final String draftTitle;
-  final String draftBody;
   final String searchQuery;
   final IdeaSaveState saveState;
   final bool isLoading;
@@ -53,7 +51,6 @@ class IdeaState {
     Idea? current,
     bool clearCurrent = false,
     String? draftTitle,
-    String? draftBody,
     String? searchQuery,
     IdeaSaveState? saveState,
     bool? isLoading,
@@ -67,7 +64,6 @@ class IdeaState {
       ideas: ideas ?? this.ideas,
       current: clearCurrent ? null : current ?? this.current,
       draftTitle: draftTitle ?? this.draftTitle,
-      draftBody: draftBody ?? this.draftBody,
       searchQuery: searchQuery ?? this.searchQuery,
       saveState: saveState ?? this.saveState,
       isLoading: isLoading ?? this.isLoading,
@@ -131,7 +127,6 @@ class IdeaController extends StateNotifier<IdeaState> {
         ideas: [idea, ...state.ideas],
         current: idea,
         draftTitle: idea.title,
-        draftBody: idea.body,
         saveState: IdeaSaveState.saved,
         isDirty: false,
         clearError: true,
@@ -155,7 +150,6 @@ class IdeaController extends StateNotifier<IdeaState> {
         appId: idea.appId,
         current: idea,
         draftTitle: idea.title,
-        draftBody: idea.body,
         saveState: IdeaSaveState.saved,
         isDirty: false,
         clearError: true,
@@ -165,11 +159,10 @@ class IdeaController extends StateNotifier<IdeaState> {
     }
   }
 
-  void updateDraft({required String title, required String body}) {
+  void updateDraftTitle(String title) {
     if (state.current == null) return;
     state = state.copyWith(
       draftTitle: title,
-      draftBody: body,
       saveState: IdeaSaveState.saving,
       isDirty: true,
       revision: state.revision + 1,
@@ -228,7 +221,6 @@ class IdeaController extends StateNotifier<IdeaState> {
         ideas: state.ideas.where((idea) => idea.id != id).toList(),
         clearCurrent: state.current?.id == id,
         draftTitle: state.current?.id == id ? '' : state.draftTitle,
-        draftBody: state.current?.id == id ? '' : state.draftBody,
         saveState: IdeaSaveState.idle,
         isDirty: false,
         clearError: true,
@@ -280,10 +272,9 @@ class IdeaController extends StateNotifier<IdeaState> {
     if (idea == null || !state.isDirty) return;
     final revision = state.revision;
     final title = state.draftTitle;
-    final body = state.draftBody;
     state = state.copyWith(saveState: IdeaSaveState.saving, clearError: true);
     try {
-      final updated = await _service.update(idea.id, title, body);
+      final updated = await _service.updateTitle(idea.id, title);
       if (state.current?.id != idea.id) return;
       final ideas = [
         for (final item in state.ideas)

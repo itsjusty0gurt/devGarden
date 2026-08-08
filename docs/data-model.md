@@ -2,7 +2,7 @@
 
 This document describes the broader conceptual model and the smaller implemented schema. SQLite with Drift is accepted for local relational persistence by [ADR 0001](decisions/0001-application-technology-stack.md) and [ADR 0002](decisions/0002-local-persistence-with-drift.md). UUID v7 is accepted as the stable identifier format by [ADR 0003](decisions/0003-stable-identifiers-with-uuid-v7.md). Domain models do not depend directly on Drift-generated table or data classes.
 
-## Implemented schema version 2
+## Implemented schema version 3
 
 The current vertical slice persists:
 
@@ -10,11 +10,14 @@ The current vertical slice persists:
 - Project: `id`, `workspaceId`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
 - App: `id`, `projectId`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
 - Idea Group: `id`, `appId`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
-- Idea: `id`, `appId`, nullable `groupId`, `title`, plain-text `body`, `lifecycle`, `createdAt`, `updatedAt`, `sortOrder`, `isPinned`, `isDeleted`
+- Idea: `id`, `appId`, nullable `groupId`, `title`, legacy compatibility `body`, `lifecycle`, `createdAt`, `updatedAt`, `sortOrder`, `isPinned`, `isDeleted`
+- Content Block: `id`, `ideaId`, `type`, `sortOrder`, `textContent`, `metadataJson`, `payloadVersion`, `createdAt`, `updatedAt`, `isDeleted`
 
-IDs and foreign IDs use canonical UUID v7 strings stored as SQLite `TEXT`. The domain wraps them in `EntityId`, so application logic does not depend on that storage representation. Foreign keys preserve the hierarchy without destructive cascades. The explicit version 1 to version 2 migration creates Idea Groups and adds the nullable Idea membership column, leaving all existing Ideas ungrouped. Archiving a group is a transaction that soft-deletes the group and ungroups its active Ideas; it never deletes Ideas.
+IDs and foreign IDs use canonical UUID v7 strings stored as SQLite `TEXT`. The domain wraps them in `EntityId`, so application logic does not depend on that storage representation. Foreign keys preserve the hierarchy without destructive cascades. The version 1 to version 2 migration creates Idea Groups and adds nullable membership. The version 2 to version 3 migration creates Content Blocks and converts each non-empty legacy Idea body into one Paragraph block with a new UUID v7 while preserving the complete Idea record. Empty bodies do not produce meaningless persisted blocks during migration. New-editor behavior creates an empty Paragraph only when needed to make an opened Idea immediately writable.
 
-Every other conceptual entity below remains unimplemented. The future full schema, block serialization, import identity, backup and recovery, and synchronization metadata remain **TBD — requires architectural decision before implementation.**
+Content Blocks are canonical Idea content after migration. `textContent` keeps editable and searchable text directly queryable. `metadataJson` stores only small type-specific values: Heading level, Code language, and Checklist checked state. `payloadVersion` is currently `1`. The retained Idea `body` column is compatibility data and is not maintained as a second editable source of truth. Archiving a group is a transaction that soft-deletes the group and ungroups its active Ideas; it never deletes Ideas or blocks.
+
+Every other conceptual entity below remains unimplemented. The future full schema, future block payload evolution, import identity, backup and recovery, and synchronization metadata remain **TBD — requires architectural decision before implementation.**
 
 ## Hierarchy and ownership
 
@@ -58,7 +61,7 @@ The default lifecycle is Idea, Approved, Planned, Building, Complete, Rejected, 
 
 ### Content Block
 
-`id`, `owning object type`, `owning object id`, `block type`, `sort order`, `content payload`, language or format metadata where relevant, `payload version`, `created timestamp`, `updated timestamp`.
+The implemented Idea-owned form is `id`, `idea id`, `block type`, `sort order`, directly queryable text, small versioned metadata, `created timestamp`, `updated timestamp`, and soft-deletion state. Implemented types are Paragraph, Heading, Code, Checklist, Bulleted List, Numbered List, Quote, and Divider. Document ownership and future block types remain deferred.
 
 ### Document
 
@@ -116,7 +119,7 @@ These entities are presentation data. Desktop layout state must never be embedde
 - Keep created and updated timestamps as explicit metadata; do not derive them from UUID v7.
 - Prefer Trash or soft deletion over immediate permanent deletion.
 - Relationships must not cause hard deletion cascades that silently remove unrelated content.
-- Version block payloads so editors and migrations can evolve safely. **TBD — block payload persistence and versioning strategy.**
+- Version block payloads so editors and migrations can evolve safely. Initial Idea blocks use payload version `1`; future payload evolution remains **TBD — requires architectural decision before implementation.**
 - Audit or history support may be added later.
 - Sync metadata and conflict representation require a future decision.
 - Platform-specific layout records remain separate from shared content; their future synchronization policy is unresolved.

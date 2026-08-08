@@ -28,7 +28,8 @@ Implementation progress as of 2026-08-08:
 - Added repository and application-service boundaries, empty-database hierarchy creation, Explorer display of persisted hierarchy with stable in-session App selection, capture-first plain-text Idea editing, debounced autosave, explicit `Ctrl+S` flush, current-App title/body search, and confirmed soft deletion.
 - Added in-memory, temporary-file restart, application, widget, and existing-shell regression tests.
 - Added schema version 2 with an explicit non-destructive migration, optional Idea Group CRUD, All/Ungrouped/group views, safe same-App assignment, App-wide search across groups, and transactional archive-and-ungroup behavior.
-- Rich blocks, additional Idea metadata, full Trash, FTS, pinboard, sync, and mobile work remain deferred to their planned milestones.
+- Added schema version 3 and the first Idea block editor with eight block types, legacy-body migration, ordered soft-deleted blocks, block autosave, slash/fence insertion, inline Code language and Copy controls, and App-wide block-text search.
+- Additional Idea metadata, full Trash, FTS, pinboard, sync, and mobile work remain deferred to their planned milestones.
 
 - Launchable desktop shell with menu, toolbar, Project Explorer, divider, work area, and status bar.
 - Default dark theme and basic settings persistence.
@@ -49,6 +50,8 @@ Implementation progress as of 2026-08-08:
 - Editable code with language selection and copy.
 - Slash commands and fenced-code conversion.
 - Undo/redo, autosave, and safe block serialization.
+
+The initial block types, code editing, slash/fence conversion, autosave, and safe versioned persistence are implemented. Syntax highlighting, richer inline formatting, drag-and-drop, and block-aware undo/redo remain deferred.
 
 ## Milestone 4 — Desktop pinboard
 

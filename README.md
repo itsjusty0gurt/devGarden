@@ -6,7 +6,7 @@ devGarden is a developer-focused workspace for capturing, organizing, connecting
 
 ## Status
 
-Milestone 1 now includes the initial Windows desktop shell and a durable local product slice. Users can create a Workspace, Project, App, and optional Idea Group; capture and edit an ungrouped plain-text Idea immediately; move Ideas between groups; search the whole current App; and archive Ideas or groups safely through Drift-backed local SQLite persistence. Rich content blocks, full Trash, sync, and mobile presentation remain future work.
+The current Windows desktop slice supports durable local Workspaces, Projects, Apps, optional Idea Groups, and capture-first Ideas. Ideas now use an ordered block editor with Paragraph, Heading, Code, Checklist, Bulleted List, Numbered List, Quote, and Divider blocks. Users can insert and reorder blocks, copy exact code, search active block text across the current App, and archive Ideas or groups safely. Full Trash, sync, and mobile presentation remain future work.
 
 ## Technology direction
 

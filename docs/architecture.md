@@ -2,7 +2,7 @@
 
 ## Status
 
-The primary application technology direction is accepted in [ADR 0001](decisions/0001-application-technology-stack.md). The Windows desktop shell and capture-first persistence slice are implemented for Workspace, Project, App, optional Idea Group, and Idea.
+The primary application technology direction is accepted in [ADR 0001](decisions/0001-application-technology-stack.md). The Windows desktop shell and capture-first persistence slice are implemented for Workspace, Project, App, optional Idea Group, Idea, and initial Content Blocks.
 
 ## Confirmed technology direction
 
@@ -61,7 +61,9 @@ Drift migration facilities will support explicit, versioned schema evolution. De
 
 The initial shell persists presentation-only preferences in a small local JSON file. This store is limited to Explorer placement and width, appearance mode, and content zoom. It is not domain persistence and does not replace the accepted Drift and SQLite boundary.
 
-The current domain schema is Drift schema version 2 with Workspace, Project, App, Idea Group, and Idea tables. Idea Group membership is a nullable Idea foreign key, so capture remains immediately saveable without organization. The explicit version 1 to version 2 migration creates the group table and adds that nullable column; existing Ideas remain ungrouped. Stable UUID v7 identifiers are canonical UUID `TEXT` primary and foreign keys. Archive/delete actions set `isDeleted` rather than physically removing records. Archiving an Idea Group transactionally ungroups its active Ideas and never deletes them. Drift is opened once at application startup and remains behind domain repository interfaces. Tests may inject an in-memory or temporary-file database.
+The current domain schema is Drift schema version 3 with Workspace, Project, App, Idea Group, Idea, and Content Block tables. Idea Group membership remains optional. Content Blocks use explicit order, directly queryable text, versioned JSON metadata for small type-specific values, UUID v7 identity, timestamps, and soft deletion. The legacy Idea `body` column is retained for schema compatibility but is no longer canonical editable content. The explicit version 2 to version 3 migration creates a Paragraph block for every non-empty legacy body without changing the Idea record; version 1 databases still upgrade through version 2. Archive/delete actions remain non-destructive, and group archival never deletes Idea blocks.
+
+The initial editor is implemented with focused Flutter controls owned by devGarden rather than a third-party document framework. This keeps domain blocks independent of presentation and leaves richer inline formatting, syntax highlighting, undo/redo design, export mapping, and a possible future editor framework unresolved.
 
 On Windows, the database is named `devGarden.sqlite` and stored in the per-user `%APPDATA%\devGarden` directory. A database-path interface keeps this platform choice outside repositories so a future Android adapter can select its proper application-data location independently.
 
@@ -86,7 +88,7 @@ Every item below is **TBD — requires architectural decision before implementat
 - Import identity and collision policy
 - Database backup and recovery strategy
 - Full relational schema design
-- Block payload persistence and versioning strategy
+- Block payload representation beyond the implemented initial text and versioned metadata fields
 - Synchronization metadata design
 - Synchronization architecture
 - Authentication strategy

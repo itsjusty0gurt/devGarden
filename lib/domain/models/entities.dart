@@ -101,6 +101,69 @@ enum IdeaLifecycle {
   archived,
 }
 
+enum ContentBlockType {
+  paragraph,
+  heading,
+  code,
+  checklist,
+  bulletList,
+  numberedList,
+  quote,
+  divider,
+}
+
+class ContentBlock {
+  const ContentBlock({
+    required this.id,
+    required this.ideaId,
+    required this.type,
+    required this.sortOrder,
+    required this.text,
+    required this.metadata,
+    required this.payloadVersion,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.isDeleted,
+  });
+
+  final EntityId id;
+  final EntityId ideaId;
+  final ContentBlockType type;
+  final int sortOrder;
+  final String text;
+  final Map<String, Object?> metadata;
+  final int payloadVersion;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isDeleted;
+
+  int get headingLevel => (metadata['level'] as num?)?.toInt() ?? 1;
+  String get codeLanguage => metadata['language'] as String? ?? 'plainText';
+  bool get isChecked => metadata['checked'] as bool? ?? false;
+
+  ContentBlock copyWith({
+    ContentBlockType? type,
+    int? sortOrder,
+    String? text,
+    Map<String, Object?>? metadata,
+    DateTime? updatedAt,
+    bool? isDeleted,
+  }) {
+    return ContentBlock(
+      id: id,
+      ideaId: ideaId,
+      type: type ?? this.type,
+      sortOrder: sortOrder ?? this.sortOrder,
+      text: text ?? this.text,
+      metadata: metadata ?? this.metadata,
+      payloadVersion: payloadVersion,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+    );
+  }
+}
+
 class Idea {
   const Idea({
     required this.id,

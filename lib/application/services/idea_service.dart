@@ -29,12 +29,11 @@ class IdeaService {
     );
   }
 
-  Future<Idea> update(EntityId id, String title, String body) {
+  Future<Idea> updateTitle(EntityId id, String title) {
     final safeTitle = title.trim().isEmpty ? 'Untitled Idea' : title.trim();
-    return _ideas.updateContent(
+    return _ideas.updateTitle(
       id: id,
       title: safeTitle,
-      body: body,
       updatedAt: _clock().toUtc(),
     );
   }
