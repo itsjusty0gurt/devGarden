@@ -16,6 +16,7 @@ class IdeaService {
       Idea(
         id: _ids.next(),
         appId: appId,
+        groupId: null,
         title: 'Untitled Idea',
         body: '',
         lifecycle: IdeaLifecycle.idea,

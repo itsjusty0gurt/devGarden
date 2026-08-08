@@ -44,6 +44,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('ideas-view')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('create-idea-group')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('idea-group-name-field')),
+        'Research',
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Create'));
+      await tester.pumpAndSettle();
+      expect(find.text('Research'), findsOneWidget);
+
       await tester.tap(find.byKey(const Key('new-idea-button')));
       await tester.pumpAndSettle();
 
@@ -80,9 +90,19 @@ void main() {
           .read(ideaRepositoryProvider)
           .getById(capturedId);
       expect(persisted?.body, 'Recognizable persistence text');
+      expect(persisted?.groupId, isNull);
 
       await tester.tap(find.byTooltip('Back to Ideas'));
       await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Move Persistent Idea'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Research').last);
+      await tester.pumpAndSettle();
+      expect(
+        (await container.read(ideaRepositoryProvider).getById(capturedId))
+            ?.groupId,
+        isNotNull,
+      );
       await tester.enterText(
         find.byKey(const Key('idea-search-field')),
         'persistence text',

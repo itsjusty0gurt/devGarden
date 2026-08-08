@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../application/services/idea_service.dart';
+import '../../application/services/idea_group_service.dart';
 import '../../domain/models/entities.dart';
 import '../../domain/repositories/repositories.dart';
 import 'hierarchy_controller.dart';
@@ -81,6 +82,7 @@ final ideaControllerProvider = StateNotifierProvider<IdeaController, IdeaState>(
   (ref) {
     final controller = IdeaController(
       ref.watch(ideaServiceProvider),
+      ref.watch(ideaGroupServiceProvider),
       ref.watch(ideaRepositoryProvider),
     );
     ref.listen<EntityId?>(selectedAppIdProvider, (previous, next) {
@@ -91,9 +93,11 @@ final ideaControllerProvider = StateNotifierProvider<IdeaController, IdeaState>(
 );
 
 class IdeaController extends StateNotifier<IdeaState> {
-  IdeaController(this._service, this._repository) : super(const IdeaState());
+  IdeaController(this._service, this._groups, this._repository)
+    : super(const IdeaState());
 
   final IdeaService _service;
+  final IdeaGroupService _groups;
   final IdeaRepository _repository;
   Timer? _autosave;
   Future<void>? _flushFuture;
@@ -231,6 +235,27 @@ class IdeaController extends StateNotifier<IdeaState> {
       );
     } catch (error, stackTrace) {
       _report('Could not archive the Idea.', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<void> moveToGroup(EntityId id, EntityId? groupId) async {
+    if (state.current?.id == id) await flush();
+    try {
+      final updated = await _groups.assign(id, groupId);
+      state = state.copyWith(
+        ideas: [
+          for (final item in state.ideas)
+            if (item.id == id) updated else item,
+        ],
+        current: state.current?.id == id ? updated : state.current,
+        saveState: state.current?.id == id
+            ? IdeaSaveState.saved
+            : state.saveState,
+        clearError: true,
+      );
+    } catch (error, stackTrace) {
+      _report('Could not move the Idea.', error, stackTrace);
       rethrow;
     }
   }

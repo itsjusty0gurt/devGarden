@@ -1348,6 +1348,463 @@ class AppsCompanion extends UpdateCompanion<AppRow> {
   }
 }
 
+class $IdeaGroupsTable extends IdeaGroups
+    with TableInfo<$IdeaGroupsTable, IdeaGroupRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $IdeaGroupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _appIdMeta = const VerificationMeta('appId');
+  @override
+  late final GeneratedColumn<String> appId = GeneratedColumn<String>(
+    'app_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES apps (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    appId,
+    name,
+    createdAt,
+    updatedAt,
+    sortOrder,
+    isDeleted,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'idea_groups';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<IdeaGroupRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('app_id')) {
+      context.handle(
+        _appIdMeta,
+        appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_appIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  IdeaGroupRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return IdeaGroupRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      appId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
+    );
+  }
+
+  @override
+  $IdeaGroupsTable createAlias(String alias) {
+    return $IdeaGroupsTable(attachedDatabase, alias);
+  }
+}
+
+class IdeaGroupRow extends DataClass implements Insertable<IdeaGroupRow> {
+  final String id;
+  final String appId;
+  final String name;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final int sortOrder;
+  final bool isDeleted;
+  const IdeaGroupRow({
+    required this.id,
+    required this.appId,
+    required this.name,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.sortOrder,
+    required this.isDeleted,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['app_id'] = Variable<String>(appId);
+    map['name'] = Variable<String>(name);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['is_deleted'] = Variable<bool>(isDeleted);
+    return map;
+  }
+
+  IdeaGroupsCompanion toCompanion(bool nullToAbsent) {
+    return IdeaGroupsCompanion(
+      id: Value(id),
+      appId: Value(appId),
+      name: Value(name),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      sortOrder: Value(sortOrder),
+      isDeleted: Value(isDeleted),
+    );
+  }
+
+  factory IdeaGroupRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return IdeaGroupRow(
+      id: serializer.fromJson<String>(json['id']),
+      appId: serializer.fromJson<String>(json['appId']),
+      name: serializer.fromJson<String>(json['name']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'appId': serializer.toJson<String>(appId),
+      'name': serializer.toJson<String>(name),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
+    };
+  }
+
+  IdeaGroupRow copyWith({
+    String? id,
+    String? appId,
+    String? name,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? sortOrder,
+    bool? isDeleted,
+  }) => IdeaGroupRow(
+    id: id ?? this.id,
+    appId: appId ?? this.appId,
+    name: name ?? this.name,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    sortOrder: sortOrder ?? this.sortOrder,
+    isDeleted: isDeleted ?? this.isDeleted,
+  );
+  IdeaGroupRow copyWithCompanion(IdeaGroupsCompanion data) {
+    return IdeaGroupRow(
+      id: data.id.present ? data.id.value : this.id,
+      appId: data.appId.present ? data.appId.value : this.appId,
+      name: data.name.present ? data.name.value : this.name,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IdeaGroupRow(')
+          ..write('id: $id, ')
+          ..write('appId: $appId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isDeleted: $isDeleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, appId, name, createdAt, updatedAt, sortOrder, isDeleted);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is IdeaGroupRow &&
+          other.id == this.id &&
+          other.appId == this.appId &&
+          other.name == this.name &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.sortOrder == this.sortOrder &&
+          other.isDeleted == this.isDeleted);
+}
+
+class IdeaGroupsCompanion extends UpdateCompanion<IdeaGroupRow> {
+  final Value<String> id;
+  final Value<String> appId;
+  final Value<String> name;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> sortOrder;
+  final Value<bool> isDeleted;
+  final Value<int> rowid;
+  const IdeaGroupsCompanion({
+    this.id = const Value.absent(),
+    this.appId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  IdeaGroupsCompanion.insert({
+    required String id,
+    required String appId,
+    required String name,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    required int sortOrder,
+    this.isDeleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       appId = Value(appId),
+       name = Value(name),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt),
+       sortOrder = Value(sortOrder);
+  static Insertable<IdeaGroupRow> custom({
+    Expression<String>? id,
+    Expression<String>? appId,
+    Expression<String>? name,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? sortOrder,
+    Expression<bool>? isDeleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (appId != null) 'app_id': appId,
+      if (name != null) 'name': name,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (isDeleted != null) 'is_deleted': isDeleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  IdeaGroupsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? appId,
+    Value<String>? name,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? sortOrder,
+    Value<bool>? isDeleted,
+    Value<int>? rowid,
+  }) {
+    return IdeaGroupsCompanion(
+      id: id ?? this.id,
+      appId: appId ?? this.appId,
+      name: name ?? this.name,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isDeleted: isDeleted ?? this.isDeleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (appId.present) {
+      map['app_id'] = Variable<String>(appId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IdeaGroupsCompanion(')
+          ..write('id: $id, ')
+          ..write('appId: $appId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isDeleted: $isDeleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $IdeasTable extends Ideas with TableInfo<$IdeasTable, IdeaRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -1372,6 +1829,20 @@ class $IdeasTable extends Ideas with TableInfo<$IdeasTable, IdeaRow> {
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES apps (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _groupIdMeta = const VerificationMeta(
+    'groupId',
+  );
+  @override
+  late final GeneratedColumn<String> groupId = GeneratedColumn<String>(
+    'group_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES idea_groups (id) ON DELETE SET NULL',
     ),
   );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
@@ -1470,6 +1941,7 @@ class $IdeasTable extends Ideas with TableInfo<$IdeasTable, IdeaRow> {
   List<GeneratedColumn> get $columns => [
     id,
     appId,
+    groupId,
     title,
     body,
     lifecycle,
@@ -1503,6 +1975,12 @@ class $IdeasTable extends Ideas with TableInfo<$IdeasTable, IdeaRow> {
       );
     } else if (isInserting) {
       context.missing(_appIdMeta);
+    }
+    if (data.containsKey('group_id')) {
+      context.handle(
+        _groupIdMeta,
+        groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta),
+      );
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -1581,6 +2059,10 @@ class $IdeasTable extends Ideas with TableInfo<$IdeasTable, IdeaRow> {
         DriftSqlType.string,
         data['${effectivePrefix}app_id'],
       )!,
+      groupId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_id'],
+      ),
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}title'],
@@ -1625,6 +2107,7 @@ class $IdeasTable extends Ideas with TableInfo<$IdeasTable, IdeaRow> {
 class IdeaRow extends DataClass implements Insertable<IdeaRow> {
   final String id;
   final String appId;
+  final String? groupId;
   final String title;
   final String body;
   final String lifecycle;
@@ -1636,6 +2119,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
   const IdeaRow({
     required this.id,
     required this.appId,
+    this.groupId,
     required this.title,
     required this.body,
     required this.lifecycle,
@@ -1650,6 +2134,9 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['app_id'] = Variable<String>(appId);
+    if (!nullToAbsent || groupId != null) {
+      map['group_id'] = Variable<String>(groupId);
+    }
     map['title'] = Variable<String>(title);
     map['body'] = Variable<String>(body);
     map['lifecycle'] = Variable<String>(lifecycle);
@@ -1665,6 +2152,9 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
     return IdeasCompanion(
       id: Value(id),
       appId: Value(appId),
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
       title: Value(title),
       body: Value(body),
       lifecycle: Value(lifecycle),
@@ -1684,6 +2174,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
     return IdeaRow(
       id: serializer.fromJson<String>(json['id']),
       appId: serializer.fromJson<String>(json['appId']),
+      groupId: serializer.fromJson<String?>(json['groupId']),
       title: serializer.fromJson<String>(json['title']),
       body: serializer.fromJson<String>(json['body']),
       lifecycle: serializer.fromJson<String>(json['lifecycle']),
@@ -1700,6 +2191,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'appId': serializer.toJson<String>(appId),
+      'groupId': serializer.toJson<String?>(groupId),
       'title': serializer.toJson<String>(title),
       'body': serializer.toJson<String>(body),
       'lifecycle': serializer.toJson<String>(lifecycle),
@@ -1714,6 +2206,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
   IdeaRow copyWith({
     String? id,
     String? appId,
+    Value<String?> groupId = const Value.absent(),
     String? title,
     String? body,
     String? lifecycle,
@@ -1725,6 +2218,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
   }) => IdeaRow(
     id: id ?? this.id,
     appId: appId ?? this.appId,
+    groupId: groupId.present ? groupId.value : this.groupId,
     title: title ?? this.title,
     body: body ?? this.body,
     lifecycle: lifecycle ?? this.lifecycle,
@@ -1738,6 +2232,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
     return IdeaRow(
       id: data.id.present ? data.id.value : this.id,
       appId: data.appId.present ? data.appId.value : this.appId,
+      groupId: data.groupId.present ? data.groupId.value : this.groupId,
       title: data.title.present ? data.title.value : this.title,
       body: data.body.present ? data.body.value : this.body,
       lifecycle: data.lifecycle.present ? data.lifecycle.value : this.lifecycle,
@@ -1754,6 +2249,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
     return (StringBuffer('IdeaRow(')
           ..write('id: $id, ')
           ..write('appId: $appId, ')
+          ..write('groupId: $groupId, ')
           ..write('title: $title, ')
           ..write('body: $body, ')
           ..write('lifecycle: $lifecycle, ')
@@ -1770,6 +2266,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
   int get hashCode => Object.hash(
     id,
     appId,
+    groupId,
     title,
     body,
     lifecycle,
@@ -1785,6 +2282,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
       (other is IdeaRow &&
           other.id == this.id &&
           other.appId == this.appId &&
+          other.groupId == this.groupId &&
           other.title == this.title &&
           other.body == this.body &&
           other.lifecycle == this.lifecycle &&
@@ -1798,6 +2296,7 @@ class IdeaRow extends DataClass implements Insertable<IdeaRow> {
 class IdeasCompanion extends UpdateCompanion<IdeaRow> {
   final Value<String> id;
   final Value<String> appId;
+  final Value<String?> groupId;
   final Value<String> title;
   final Value<String> body;
   final Value<String> lifecycle;
@@ -1810,6 +2309,7 @@ class IdeasCompanion extends UpdateCompanion<IdeaRow> {
   const IdeasCompanion({
     this.id = const Value.absent(),
     this.appId = const Value.absent(),
+    this.groupId = const Value.absent(),
     this.title = const Value.absent(),
     this.body = const Value.absent(),
     this.lifecycle = const Value.absent(),
@@ -1823,6 +2323,7 @@ class IdeasCompanion extends UpdateCompanion<IdeaRow> {
   IdeasCompanion.insert({
     required String id,
     required String appId,
+    this.groupId = const Value.absent(),
     required String title,
     required String body,
     required String lifecycle,
@@ -1843,6 +2344,7 @@ class IdeasCompanion extends UpdateCompanion<IdeaRow> {
   static Insertable<IdeaRow> custom({
     Expression<String>? id,
     Expression<String>? appId,
+    Expression<String>? groupId,
     Expression<String>? title,
     Expression<String>? body,
     Expression<String>? lifecycle,
@@ -1856,6 +2358,7 @@ class IdeasCompanion extends UpdateCompanion<IdeaRow> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (appId != null) 'app_id': appId,
+      if (groupId != null) 'group_id': groupId,
       if (title != null) 'title': title,
       if (body != null) 'body': body,
       if (lifecycle != null) 'lifecycle': lifecycle,
@@ -1871,6 +2374,7 @@ class IdeasCompanion extends UpdateCompanion<IdeaRow> {
   IdeasCompanion copyWith({
     Value<String>? id,
     Value<String>? appId,
+    Value<String?>? groupId,
     Value<String>? title,
     Value<String>? body,
     Value<String>? lifecycle,
@@ -1884,6 +2388,7 @@ class IdeasCompanion extends UpdateCompanion<IdeaRow> {
     return IdeasCompanion(
       id: id ?? this.id,
       appId: appId ?? this.appId,
+      groupId: groupId ?? this.groupId,
       title: title ?? this.title,
       body: body ?? this.body,
       lifecycle: lifecycle ?? this.lifecycle,
@@ -1904,6 +2409,9 @@ class IdeasCompanion extends UpdateCompanion<IdeaRow> {
     }
     if (appId.present) {
       map['app_id'] = Variable<String>(appId.value);
+    }
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -1940,6 +2448,7 @@ class IdeasCompanion extends UpdateCompanion<IdeaRow> {
     return (StringBuffer('IdeasCompanion(')
           ..write('id: $id, ')
           ..write('appId: $appId, ')
+          ..write('groupId: $groupId, ')
           ..write('title: $title, ')
           ..write('body: $body, ')
           ..write('lifecycle: $lifecycle, ')
@@ -1960,6 +2469,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $WorkspacesTable workspaces = $WorkspacesTable(this);
   late final $ProjectsTable projects = $ProjectsTable(this);
   late final $AppsTable apps = $AppsTable(this);
+  late final $IdeaGroupsTable ideaGroups = $IdeaGroupsTable(this);
   late final $IdeasTable ideas = $IdeasTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -1969,8 +2479,19 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     workspaces,
     projects,
     apps,
+    ideaGroups,
     ideas,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'idea_groups',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('ideas', kind: UpdateKind.update)],
+    ),
+  ]);
 }
 
 typedef $$WorkspacesTableCreateCompanionBuilder =
@@ -2780,6 +3301,24 @@ final class $$AppsTableReferences
     );
   }
 
+  static MultiTypedResultKey<$IdeaGroupsTable, List<IdeaGroupRow>>
+  _ideaGroupsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.ideaGroups,
+    aliasName: 'apps__id__idea_groups__app_id',
+  );
+
+  $$IdeaGroupsTableProcessedTableManager get ideaGroupsRefs {
+    final manager = $$IdeaGroupsTableTableManager(
+      $_db,
+      $_db.ideaGroups,
+    ).filter((f) => f.appId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_ideaGroupsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$IdeasTable, List<IdeaRow>> _ideasRefsTable(
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
@@ -2859,6 +3398,31 @@ class $$AppsTableFilterComposer extends Composer<_$AppDatabase, $AppsTable> {
           ),
     );
     return composer;
+  }
+
+  Expression<bool> ideaGroupsRefs(
+    Expression<bool> Function($$IdeaGroupsTableFilterComposer f) f,
+  ) {
+    final $$IdeaGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.ideaGroups,
+      getReferencedColumn: (t) => t.appId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeaGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.ideaGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<bool> ideasRefs(
@@ -2999,6 +3563,31 @@ class $$AppsTableAnnotationComposer
     return composer;
   }
 
+  Expression<T> ideaGroupsRefs<T extends Object>(
+    Expression<T> Function($$IdeaGroupsTableAnnotationComposer a) f,
+  ) {
+    final $$IdeaGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.ideaGroups,
+      getReferencedColumn: (t) => t.appId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeaGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ideaGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> ideasRefs<T extends Object>(
     Expression<T> Function($$IdeasTableAnnotationComposer a) f,
   ) {
@@ -3038,7 +3627,11 @@ class $$AppsTableTableManager
           $$AppsTableUpdateCompanionBuilder,
           (AppRow, $$AppsTableReferences),
           AppRow,
-          PrefetchHooks Function({bool projectId, bool ideasRefs})
+          PrefetchHooks Function({
+            bool projectId,
+            bool ideaGroupsRefs,
+            bool ideasRefs,
+          })
         > {
   $$AppsTableTableManager(_$AppDatabase db, $AppsTable table)
     : super(
@@ -3097,7 +3690,473 @@ class $$AppsTableTableManager
                     (e.readTable(table), $$AppsTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({projectId = false, ideasRefs = false}) {
+          prefetchHooksCallback:
+              ({projectId = false, ideaGroupsRefs = false, ideasRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (ideaGroupsRefs) db.ideaGroups,
+                    if (ideasRefs) db.ideas,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (projectId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.projectId,
+                                    referencedTable: $$AppsTableReferences
+                                        ._projectIdTable(db),
+                                    referencedColumn: $$AppsTableReferences
+                                        ._projectIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (ideaGroupsRefs)
+                        await $_getPrefetchedData<
+                          AppRow,
+                          $AppsTable,
+                          IdeaGroupRow
+                        >(
+                          currentTable: table,
+                          referencedTable: $$AppsTableReferences
+                              ._ideaGroupsRefsTable(db),
+                          managerFromTypedResult: (p0) => $$AppsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).ideaGroupsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.appId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (ideasRefs)
+                        await $_getPrefetchedData<AppRow, $AppsTable, IdeaRow>(
+                          currentTable: table,
+                          referencedTable: $$AppsTableReferences
+                              ._ideasRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$AppsTableReferences(db, table, p0).ideasRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.appId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$AppsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AppsTable,
+      AppRow,
+      $$AppsTableFilterComposer,
+      $$AppsTableOrderingComposer,
+      $$AppsTableAnnotationComposer,
+      $$AppsTableCreateCompanionBuilder,
+      $$AppsTableUpdateCompanionBuilder,
+      (AppRow, $$AppsTableReferences),
+      AppRow,
+      PrefetchHooks Function({
+        bool projectId,
+        bool ideaGroupsRefs,
+        bool ideasRefs,
+      })
+    >;
+typedef $$IdeaGroupsTableCreateCompanionBuilder =
+    IdeaGroupsCompanion Function({
+      required String id,
+      required String appId,
+      required String name,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      required int sortOrder,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+typedef $$IdeaGroupsTableUpdateCompanionBuilder =
+    IdeaGroupsCompanion Function({
+      Value<String> id,
+      Value<String> appId,
+      Value<String> name,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> sortOrder,
+      Value<bool> isDeleted,
+      Value<int> rowid,
+    });
+
+final class $$IdeaGroupsTableReferences
+    extends BaseReferences<_$AppDatabase, $IdeaGroupsTable, IdeaGroupRow> {
+  $$IdeaGroupsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $AppsTable _appIdTable(_$AppDatabase db) =>
+      db.apps.createAlias('idea_groups__app_id__apps__id');
+
+  $$AppsTableProcessedTableManager get appId {
+    final $_column = $_itemColumn<String>('app_id')!;
+
+    final manager = $$AppsTableTableManager(
+      $_db,
+      $_db.apps,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_appIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$IdeasTable, List<IdeaRow>> _ideasRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.ideas,
+    aliasName: 'idea_groups__id__ideas__group_id',
+  );
+
+  $$IdeasTableProcessedTableManager get ideasRefs {
+    final manager = $$IdeasTableTableManager(
+      $_db,
+      $_db.ideas,
+    ).filter((f) => f.groupId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_ideasRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$IdeaGroupsTableFilterComposer
+    extends Composer<_$AppDatabase, $IdeaGroupsTable> {
+  $$IdeaGroupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$AppsTableFilterComposer get appId {
+    final $$AppsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.appId,
+      referencedTable: $db.apps,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AppsTableFilterComposer(
+            $db: $db,
+            $table: $db.apps,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> ideasRefs(
+    Expression<bool> Function($$IdeasTableFilterComposer f) f,
+  ) {
+    final $$IdeasTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.ideas,
+      getReferencedColumn: (t) => t.groupId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeasTableFilterComposer(
+            $db: $db,
+            $table: $db.ideas,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$IdeaGroupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $IdeaGroupsTable> {
+  $$IdeaGroupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$AppsTableOrderingComposer get appId {
+    final $$AppsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.appId,
+      referencedTable: $db.apps,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AppsTableOrderingComposer(
+            $db: $db,
+            $table: $db.apps,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$IdeaGroupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $IdeaGroupsTable> {
+  $$IdeaGroupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
+
+  $$AppsTableAnnotationComposer get appId {
+    final $$AppsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.appId,
+      referencedTable: $db.apps,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AppsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.apps,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> ideasRefs<T extends Object>(
+    Expression<T> Function($$IdeasTableAnnotationComposer a) f,
+  ) {
+    final $$IdeasTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.ideas,
+      getReferencedColumn: (t) => t.groupId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeasTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ideas,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$IdeaGroupsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $IdeaGroupsTable,
+          IdeaGroupRow,
+          $$IdeaGroupsTableFilterComposer,
+          $$IdeaGroupsTableOrderingComposer,
+          $$IdeaGroupsTableAnnotationComposer,
+          $$IdeaGroupsTableCreateCompanionBuilder,
+          $$IdeaGroupsTableUpdateCompanionBuilder,
+          (IdeaGroupRow, $$IdeaGroupsTableReferences),
+          IdeaGroupRow,
+          PrefetchHooks Function({bool appId, bool ideasRefs})
+        > {
+  $$IdeaGroupsTableTableManager(_$AppDatabase db, $IdeaGroupsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$IdeaGroupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$IdeaGroupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$IdeaGroupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> appId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IdeaGroupsCompanion(
+                id: id,
+                appId: appId,
+                name: name,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                sortOrder: sortOrder,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String appId,
+                required String name,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                required int sortOrder,
+                Value<bool> isDeleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => IdeaGroupsCompanion.insert(
+                id: id,
+                appId: appId,
+                name: name,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                sortOrder: sortOrder,
+                isDeleted: isDeleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$IdeaGroupsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({appId = false, ideasRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [if (ideasRefs) db.ideas],
@@ -3117,15 +4176,15 @@ class $$AppsTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (projectId) {
+                    if (appId) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.projectId,
-                                referencedTable: $$AppsTableReferences
-                                    ._projectIdTable(db),
-                                referencedColumn: $$AppsTableReferences
-                                    ._projectIdTable(db)
+                                currentColumn: table.appId,
+                                referencedTable: $$IdeaGroupsTableReferences
+                                    ._appIdTable(db),
+                                referencedColumn: $$IdeaGroupsTableReferences
+                                    ._appIdTable(db)
                                     .id,
                               )
                               as T;
@@ -3136,15 +4195,18 @@ class $$AppsTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (ideasRefs)
-                    await $_getPrefetchedData<AppRow, $AppsTable, IdeaRow>(
+                    await $_getPrefetchedData<
+                      IdeaGroupRow,
+                      $IdeaGroupsTable,
+                      IdeaRow
+                    >(
                       currentTable: table,
-                      referencedTable: $$AppsTableReferences._ideasRefsTable(
-                        db,
-                      ),
+                      referencedTable: $$IdeaGroupsTableReferences
+                          ._ideasRefsTable(db),
                       managerFromTypedResult: (p0) =>
-                          $$AppsTableReferences(db, table, p0).ideasRefs,
+                          $$IdeaGroupsTableReferences(db, table, p0).ideasRefs,
                       referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.appId == item.id),
+                          referencedItems.where((e) => e.groupId == item.id),
                       typedResults: items,
                     ),
                 ];
@@ -3155,24 +4217,25 @@ class $$AppsTableTableManager
       );
 }
 
-typedef $$AppsTableProcessedTableManager =
+typedef $$IdeaGroupsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $AppsTable,
-      AppRow,
-      $$AppsTableFilterComposer,
-      $$AppsTableOrderingComposer,
-      $$AppsTableAnnotationComposer,
-      $$AppsTableCreateCompanionBuilder,
-      $$AppsTableUpdateCompanionBuilder,
-      (AppRow, $$AppsTableReferences),
-      AppRow,
-      PrefetchHooks Function({bool projectId, bool ideasRefs})
+      $IdeaGroupsTable,
+      IdeaGroupRow,
+      $$IdeaGroupsTableFilterComposer,
+      $$IdeaGroupsTableOrderingComposer,
+      $$IdeaGroupsTableAnnotationComposer,
+      $$IdeaGroupsTableCreateCompanionBuilder,
+      $$IdeaGroupsTableUpdateCompanionBuilder,
+      (IdeaGroupRow, $$IdeaGroupsTableReferences),
+      IdeaGroupRow,
+      PrefetchHooks Function({bool appId, bool ideasRefs})
     >;
 typedef $$IdeasTableCreateCompanionBuilder =
     IdeasCompanion Function({
       required String id,
       required String appId,
+      Value<String?> groupId,
       required String title,
       required String body,
       required String lifecycle,
@@ -3187,6 +4250,7 @@ typedef $$IdeasTableUpdateCompanionBuilder =
     IdeasCompanion Function({
       Value<String> id,
       Value<String> appId,
+      Value<String?> groupId,
       Value<String> title,
       Value<String> body,
       Value<String> lifecycle,
@@ -3213,6 +4277,23 @@ final class $$IdeasTableReferences
       $_db.apps,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_appIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $IdeaGroupsTable _groupIdTable(_$AppDatabase db) =>
+      db.ideaGroups.createAlias('ideas__group_id__idea_groups__id');
+
+  $$IdeaGroupsTableProcessedTableManager? get groupId {
+    final $_column = $_itemColumn<String>('group_id');
+    if ($_column == null) return null;
+    final manager = $$IdeaGroupsTableTableManager(
+      $_db,
+      $_db.ideaGroups,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_groupIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -3287,6 +4368,29 @@ class $$IdeasTableFilterComposer extends Composer<_$AppDatabase, $IdeasTable> {
           }) => $$AppsTableFilterComposer(
             $db: $db,
             $table: $db.apps,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$IdeaGroupsTableFilterComposer get groupId {
+    final $$IdeaGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.ideaGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeaGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.ideaGroups,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3373,6 +4477,29 @@ class $$IdeasTableOrderingComposer
     );
     return composer;
   }
+
+  $$IdeaGroupsTableOrderingComposer get groupId {
+    final $$IdeaGroupsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.ideaGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeaGroupsTableOrderingComposer(
+            $db: $db,
+            $table: $db.ideaGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$IdeasTableAnnotationComposer
@@ -3433,6 +4560,29 @@ class $$IdeasTableAnnotationComposer
     );
     return composer;
   }
+
+  $$IdeaGroupsTableAnnotationComposer get groupId {
+    final $$IdeaGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.groupId,
+      referencedTable: $db.ideaGroups,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IdeaGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.ideaGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$IdeasTableTableManager
@@ -3448,7 +4598,7 @@ class $$IdeasTableTableManager
           $$IdeasTableUpdateCompanionBuilder,
           (IdeaRow, $$IdeasTableReferences),
           IdeaRow,
-          PrefetchHooks Function({bool appId})
+          PrefetchHooks Function({bool appId, bool groupId})
         > {
   $$IdeasTableTableManager(_$AppDatabase db, $IdeasTable table)
     : super(
@@ -3465,6 +4615,7 @@ class $$IdeasTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> appId = const Value.absent(),
+                Value<String?> groupId = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String> body = const Value.absent(),
                 Value<String> lifecycle = const Value.absent(),
@@ -3477,6 +4628,7 @@ class $$IdeasTableTableManager
               }) => IdeasCompanion(
                 id: id,
                 appId: appId,
+                groupId: groupId,
                 title: title,
                 body: body,
                 lifecycle: lifecycle,
@@ -3491,6 +4643,7 @@ class $$IdeasTableTableManager
               ({
                 required String id,
                 required String appId,
+                Value<String?> groupId = const Value.absent(),
                 required String title,
                 required String body,
                 required String lifecycle,
@@ -3503,6 +4656,7 @@ class $$IdeasTableTableManager
               }) => IdeasCompanion.insert(
                 id: id,
                 appId: appId,
+                groupId: groupId,
                 title: title,
                 body: body,
                 lifecycle: lifecycle,
@@ -3519,7 +4673,7 @@ class $$IdeasTableTableManager
                     (e.readTable(table), $$IdeasTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({appId = false}) {
+          prefetchHooksCallback: ({appId = false, groupId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -3552,6 +4706,19 @@ class $$IdeasTableTableManager
                               )
                               as T;
                     }
+                    if (groupId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.groupId,
+                                referencedTable: $$IdeasTableReferences
+                                    ._groupIdTable(db),
+                                referencedColumn: $$IdeasTableReferences
+                                    ._groupIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
 
                     return state;
                   },
@@ -3576,7 +4743,7 @@ typedef $$IdeasTableProcessedTableManager =
       $$IdeasTableUpdateCompanionBuilder,
       (IdeaRow, $$IdeasTableReferences),
       IdeaRow,
-      PrefetchHooks Function({bool appId})
+      PrefetchHooks Function({bool appId, bool groupId})
     >;
 
 class $AppDatabaseManager {
@@ -3587,6 +4754,8 @@ class $AppDatabaseManager {
   $$ProjectsTableTableManager get projects =>
       $$ProjectsTableTableManager(_db, _db.projects);
   $$AppsTableTableManager get apps => $$AppsTableTableManager(_db, _db.apps);
+  $$IdeaGroupsTableTableManager get ideaGroups =>
+      $$IdeaGroupsTableTableManager(_db, _db.ideaGroups);
   $$IdeasTableTableManager get ideas =>
       $$IdeasTableTableManager(_db, _db.ideas);
 }

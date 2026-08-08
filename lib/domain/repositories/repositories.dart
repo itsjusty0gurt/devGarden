@@ -15,10 +15,25 @@ abstract interface class AppRepository {
   Future<List<GardenApp>> listActiveByProject(EntityId projectId);
 }
 
+abstract interface class IdeaGroupRepository {
+  Future<IdeaGroup> create(IdeaGroup group);
+  Future<IdeaGroup?> getById(EntityId id);
+  Future<List<IdeaGroup>> listActiveByApp(EntityId appId);
+  Future<IdeaGroup> rename(EntityId id, String name, DateTime updatedAt);
+  Future<void> archiveAndUngroup(EntityId id, DateTime updatedAt);
+}
+
 abstract interface class IdeaRepository {
   Future<Idea> create(Idea idea);
   Future<Idea?> getById(EntityId id);
   Future<List<Idea>> listActiveByApp(EntityId appId);
+  Future<List<Idea>> listActiveUngroupedByApp(EntityId appId);
+  Future<List<Idea>> listActiveByGroup(EntityId groupId);
+  Future<Idea> assignToGroup({
+    required EntityId id,
+    required EntityId? groupId,
+    required DateTime updatedAt,
+  });
   Future<Idea> updateContent({
     required EntityId id,
     required String title,

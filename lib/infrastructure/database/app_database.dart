@@ -48,11 +48,31 @@ class Apps extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('IdeaGroupRow')
+class IdeaGroups extends Table {
+  TextColumn get id => text()();
+  TextColumn get appId =>
+      text().references(Apps, #id, onDelete: KeyAction.restrict)();
+  TextColumn get name => text()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  IntColumn get sortOrder => integer()();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DataClassName('IdeaRow')
 class Ideas extends Table {
   TextColumn get id => text()();
   TextColumn get appId =>
       text().references(Apps, #id, onDelete: KeyAction.restrict)();
+  TextColumn get groupId => text().nullable().references(
+    IdeaGroups,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
   TextColumn get title => text()();
   TextColumn get body => text()();
   TextColumn get lifecycle => text()();
@@ -66,7 +86,7 @@ class Ideas extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Workspaces, Projects, Apps, Ideas])
+@DriftDatabase(tables: [Workspaces, Projects, Apps, IdeaGroups, Ideas])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
@@ -81,11 +101,17 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (migrator) => migrator.createAll(),
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        await migrator.createTable(ideaGroups);
+        await migrator.addColumn(ideas, ideas.groupId);
+      }
+    },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
   );
 }

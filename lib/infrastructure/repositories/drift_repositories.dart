@@ -119,6 +119,102 @@ class DriftAppRepository implements AppRepository {
   }
 }
 
+class DriftIdeaGroupRepository implements IdeaGroupRepository {
+  const DriftIdeaGroupRepository(this._database);
+
+  final AppDatabase _database;
+
+  @override
+  Future<domain.IdeaGroup> create(domain.IdeaGroup group) async {
+    await _database
+        .into(_database.ideaGroups)
+        .insert(
+          IdeaGroupsCompanion(
+            id: Value(group.id.value),
+            appId: Value(group.appId.value),
+            name: Value(group.name),
+            createdAt: Value(group.createdAt),
+            updatedAt: Value(group.updatedAt),
+            sortOrder: Value(group.sortOrder),
+            isDeleted: Value(group.isDeleted),
+          ),
+        );
+    return group;
+  }
+
+  @override
+  Future<domain.IdeaGroup?> getById(domain.EntityId id) async {
+    final query = _database.select(_database.ideaGroups)
+      ..where((row) => row.id.equals(id.value));
+    final row = await query.getSingleOrNull();
+    return row == null ? null : _ideaGroup(row);
+  }
+
+  @override
+  Future<List<domain.IdeaGroup>> listActiveByApp(domain.EntityId appId) async {
+    final query = _database.select(_database.ideaGroups)
+      ..where(
+        (row) => row.appId.equals(appId.value) & row.isDeleted.equals(false),
+      )
+      ..orderBy([
+        (row) => OrderingTerm(expression: row.sortOrder),
+        (row) => OrderingTerm(expression: row.createdAt),
+      ]);
+    return (await query.get()).map(_ideaGroup).toList();
+  }
+
+  @override
+  Future<domain.IdeaGroup> rename(
+    domain.EntityId id,
+    String name,
+    DateTime updatedAt,
+  ) async {
+    final changed =
+        await (_database.update(
+          _database.ideaGroups,
+        )..where((row) => row.id.equals(id.value))).write(
+          IdeaGroupsCompanion(name: Value(name), updatedAt: Value(updatedAt)),
+        );
+    if (changed != 1) throw StateError('The Idea Group could not be renamed.');
+    final updated = await getById(id);
+    if (updated == null) {
+      throw StateError('The Idea Group could not be reloaded.');
+    }
+    return updated;
+  }
+
+  @override
+  Future<void> archiveAndUngroup(domain.EntityId id, DateTime updatedAt) {
+    return _database.transaction(() async {
+      final group = await getById(id);
+      if (group == null || group.isDeleted) {
+        throw StateError('The Idea Group is unavailable.');
+      }
+      await (_database.update(_database.ideas)..where(
+            (row) => row.groupId.equals(id.value) & row.isDeleted.equals(false),
+          ))
+          .write(
+            IdeasCompanion(
+              groupId: const Value(null),
+              updatedAt: Value(updatedAt),
+            ),
+          );
+      final changed =
+          await (_database.update(
+            _database.ideaGroups,
+          )..where((row) => row.id.equals(id.value))).write(
+            IdeaGroupsCompanion(
+              isDeleted: const Value(true),
+              updatedAt: Value(updatedAt),
+            ),
+          );
+      if (changed != 1) {
+        throw StateError('The Idea Group could not be archived.');
+      }
+    });
+  }
+}
+
 class DriftIdeaRepository implements IdeaRepository {
   const DriftIdeaRepository(this._database);
 
@@ -132,6 +228,7 @@ class DriftIdeaRepository implements IdeaRepository {
           IdeasCompanion(
             id: Value(idea.id.value),
             appId: Value(idea.appId.value),
+            groupId: Value(idea.groupId?.value),
             title: Value(idea.title),
             body: Value(idea.body),
             lifecycle: Value(idea.lifecycle.name),
@@ -158,6 +255,49 @@ class DriftIdeaRepository implements IdeaRepository {
     return _activeIdeaQuery(
       appId,
     ).get().then((rows) => rows.map(_idea).toList());
+  }
+
+  @override
+  Future<List<domain.Idea>> listActiveUngroupedByApp(
+    domain.EntityId appId,
+  ) async {
+    final query = _activeIdeaQuery(appId)..where((row) => row.groupId.isNull());
+    return (await query.get()).map(_idea).toList();
+  }
+
+  @override
+  Future<List<domain.Idea>> listActiveByGroup(domain.EntityId groupId) async {
+    final query = _database.select(_database.ideas)
+      ..where(
+        (row) =>
+            row.groupId.equals(groupId.value) & row.isDeleted.equals(false),
+      )
+      ..orderBy([
+        (row) =>
+            OrderingTerm(expression: row.updatedAt, mode: OrderingMode.desc),
+      ]);
+    return (await query.get()).map(_idea).toList();
+  }
+
+  @override
+  Future<domain.Idea> assignToGroup({
+    required domain.EntityId id,
+    required domain.EntityId? groupId,
+    required DateTime updatedAt,
+  }) async {
+    final changed =
+        await (_database.update(
+          _database.ideas,
+        )..where((row) => row.id.equals(id.value))).write(
+          IdeasCompanion(
+            groupId: Value(groupId?.value),
+            updatedAt: Value(updatedAt),
+          ),
+        );
+    if (changed != 1) throw StateError('The Idea could not be moved.');
+    final updated = await getById(id);
+    if (updated == null) throw StateError('The Idea could not be reloaded.');
+    return updated;
   }
 
   @override
@@ -265,9 +405,20 @@ domain.GardenApp _app(AppRow row) => domain.GardenApp(
   isDeleted: row.isDeleted,
 );
 
+domain.IdeaGroup _ideaGroup(IdeaGroupRow row) => domain.IdeaGroup(
+  id: domain.EntityId(row.id),
+  appId: domain.EntityId(row.appId),
+  name: row.name,
+  createdAt: row.createdAt,
+  updatedAt: row.updatedAt,
+  sortOrder: row.sortOrder,
+  isDeleted: row.isDeleted,
+);
+
 domain.Idea _idea(IdeaRow row) => domain.Idea(
   id: domain.EntityId(row.id),
   appId: domain.EntityId(row.appId),
+  groupId: row.groupId == null ? null : domain.EntityId(row.groupId!),
   title: row.title,
   body: row.body,
   lifecycle: domain.IdeaLifecycle.values.byName(row.lifecycle),

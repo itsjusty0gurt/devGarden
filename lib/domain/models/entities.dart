@@ -71,6 +71,26 @@ class GardenApp {
   final bool isDeleted;
 }
 
+class IdeaGroup {
+  const IdeaGroup({
+    required this.id,
+    required this.appId,
+    required this.name,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.sortOrder,
+    required this.isDeleted,
+  });
+
+  final EntityId id;
+  final EntityId appId;
+  final String name;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final int sortOrder;
+  final bool isDeleted;
+}
+
 enum IdeaLifecycle {
   idea,
   approved,
@@ -93,10 +113,12 @@ class Idea {
     required this.sortOrder,
     required this.isPinned,
     required this.isDeleted,
+    this.groupId,
   });
 
   final EntityId id;
   final EntityId appId;
+  final EntityId? groupId;
   final String title;
   final String body;
   final IdeaLifecycle lifecycle;
@@ -111,10 +133,13 @@ class Idea {
     String? body,
     DateTime? updatedAt,
     bool? isDeleted,
+    EntityId? groupId,
+    bool clearGroup = false,
   }) {
     return Idea(
       id: id,
       appId: appId,
+      groupId: clearGroup ? null : groupId ?? this.groupId,
       title: title ?? this.title,
       body: body ?? this.body,
       lifecycle: lifecycle,

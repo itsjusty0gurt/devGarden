@@ -15,9 +15,9 @@ No full application implementation belongs in this milestone.
 
 ## Milestone 1 — Local desktop foundation
 
-Milestone 1 targets Flutter and Dart on Windows desktop, using Riverpod, GoRouter, and Drift over SQLite for local persistence. The desktop shell and first persistence slice are implemented, but Idea Group CRUD and other milestone work remain open.
+Milestone 1 targets Flutter and Dart on Windows desktop, using Riverpod, GoRouter, and Drift over SQLite for local persistence. The desktop shell, capture-first persistence, and optional Idea Group organization are implemented, but other milestone work remains open.
 
-Implementation progress as of 2026-08-07:
+Implementation progress as of 2026-08-08:
 
 - Completed the runnable Windows Flutter scaffold and initial desktop shell.
 - Implemented the menu bar, restrained toolbar, Project Explorer, draggable divider, work area, and status bar.
@@ -27,7 +27,8 @@ Implementation progress as of 2026-08-07:
 - Added application-generated UUID v7 identity through the Dart `uuid` package and a per-user Windows database at `%APPDATA%\devGarden\devGarden.sqlite`.
 - Added repository and application-service boundaries, empty-database hierarchy creation, Explorer display of persisted hierarchy with stable in-session App selection, capture-first plain-text Idea editing, debounced autosave, explicit `Ctrl+S` flush, current-App title/body search, and confirmed soft deletion.
 - Added in-memory, temporary-file restart, application, widget, and existing-shell regression tests.
-- Idea Group CRUD has not started, so Milestone 1 is not complete. Rich blocks, additional Idea metadata, full Trash, FTS, pinboard, sync, and mobile work remain deferred to their planned milestones.
+- Added schema version 2 with an explicit non-destructive migration, optional Idea Group CRUD, All/Ungrouped/group views, safe same-App assignment, App-wide search across groups, and transactional archive-and-ungroup behavior.
+- Rich blocks, additional Idea metadata, full Trash, FTS, pinboard, sync, and mobile work remain deferred to their planned milestones.
 
 - Launchable desktop shell with menu, toolbar, Project Explorer, divider, work area, and status bar.
 - Default dark theme and basic settings persistence.

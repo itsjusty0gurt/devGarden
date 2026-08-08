@@ -2,18 +2,19 @@
 
 This document describes the broader conceptual model and the smaller implemented schema. SQLite with Drift is accepted for local relational persistence by [ADR 0001](decisions/0001-application-technology-stack.md) and [ADR 0002](decisions/0002-local-persistence-with-drift.md). UUID v7 is accepted as the stable identifier format by [ADR 0003](decisions/0003-stable-identifiers-with-uuid-v7.md). Domain models do not depend directly on Drift-generated table or data classes.
 
-## Implemented schema version 1
+## Implemented schema version 2
 
-The first vertical slice persists only:
+The current vertical slice persists:
 
 - Workspace: `id`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
 - Project: `id`, `workspaceId`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
 - App: `id`, `projectId`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
-- Idea: `id`, `appId`, `title`, plain-text `body`, `lifecycle`, `createdAt`, `updatedAt`, `sortOrder`, `isPinned`, `isDeleted`
+- Idea Group: `id`, `appId`, `name`, `createdAt`, `updatedAt`, `sortOrder`, `isDeleted`
+- Idea: `id`, `appId`, nullable `groupId`, `title`, plain-text `body`, `lifecycle`, `createdAt`, `updatedAt`, `sortOrder`, `isPinned`, `isDeleted`
 
-IDs and foreign IDs use canonical UUID v7 strings stored as SQLite `TEXT`. The domain wraps them in `EntityId`, so application logic does not depend on that storage representation. Foreign keys preserve `Workspace → Project → App → Idea` and use restrictive deletion behavior rather than destructive cascades. Schema changes after version 1 require explicit Drift migrations.
+IDs and foreign IDs use canonical UUID v7 strings stored as SQLite `TEXT`. The domain wraps them in `EntityId`, so application logic does not depend on that storage representation. Foreign keys preserve the hierarchy without destructive cascades. The explicit version 1 to version 2 migration creates Idea Groups and adds the nullable Idea membership column, leaving all existing Ideas ungrouped. Archiving a group is a transaction that soft-deletes the group and ungroups its active Ideas; it never deletes Ideas.
 
-Idea Group and every other conceptual entity below remain unimplemented. The future full schema, block serialization, import identity, backup and recovery, and synchronization metadata remain **TBD — requires architectural decision before implementation.**
+Every other conceptual entity below remains unimplemented. The future full schema, block serialization, import identity, backup and recovery, and synchronization metadata remain **TBD — requires architectural decision before implementation.**
 
 ## Hierarchy and ownership
 

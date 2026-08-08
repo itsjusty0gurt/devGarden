@@ -1,5 +1,6 @@
 import 'package:dev_garden/application/services/id_generator.dart';
 import 'package:dev_garden/application/services/idea_service.dart';
+import 'package:dev_garden/application/services/idea_group_service.dart';
 import 'package:dev_garden/domain/models/entities.dart';
 import 'package:dev_garden/domain/repositories/repositories.dart';
 import 'package:dev_garden/presentation/garden/idea_controller.dart';
@@ -8,12 +9,22 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('failed save keeps unsaved editor text available for retry', () async {
     final repository = _FailingUpdateRepository();
+    final now = DateTime.utc(2026, 8, 7);
     final service = IdeaService(
       repository,
       const UuidV7IdGenerator(),
-      () => DateTime.utc(2026, 8, 7),
+      () => now,
     );
-    final controller = IdeaController(service, repository);
+    final controller = IdeaController(
+      service,
+      IdeaGroupService(
+        _FakeIdeaGroupRepository(),
+        repository,
+        const UuidV7IdGenerator(),
+        () => now,
+      ),
+      repository,
+    );
     addTearDown(controller.dispose);
     const appId = EntityId('app-id');
 
@@ -49,6 +60,19 @@ class _FailingUpdateRepository implements IdeaRepository {
   Future<List<Idea>> listActiveByApp(EntityId appId) async => [?idea];
 
   @override
+  Future<List<Idea>> listActiveUngroupedByApp(EntityId appId) async => [?idea];
+
+  @override
+  Future<List<Idea>> listActiveByGroup(EntityId groupId) async => [];
+
+  @override
+  Future<Idea> assignToGroup({
+    required EntityId id,
+    required EntityId? groupId,
+    required DateTime updatedAt,
+  }) async => idea!.copyWith(groupId: groupId, clearGroup: groupId == null);
+
+  @override
   Future<List<Idea>> search(EntityId appId, String query) =>
       listActiveByApp(appId);
 
@@ -63,6 +87,25 @@ class _FailingUpdateRepository implements IdeaRepository {
     required DateTime updatedAt,
   }) {
     throw const FileSystemExceptionForTest();
+  }
+}
+
+class _FakeIdeaGroupRepository implements IdeaGroupRepository {
+  @override
+  Future<void> archiveAndUngroup(EntityId id, DateTime updatedAt) async {}
+
+  @override
+  Future<IdeaGroup> create(IdeaGroup group) async => group;
+
+  @override
+  Future<IdeaGroup?> getById(EntityId id) async => null;
+
+  @override
+  Future<List<IdeaGroup>> listActiveByApp(EntityId appId) async => [];
+
+  @override
+  Future<IdeaGroup> rename(EntityId id, String name, DateTime updatedAt) {
+    throw UnimplementedError();
   }
 }
 

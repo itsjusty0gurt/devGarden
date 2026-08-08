@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/models/entities.dart';
 import 'hierarchy_controller.dart';
 import 'idea_controller.dart';
+import 'idea_group_controller.dart';
 
 class GardenHomeView extends ConsumerWidget {
   const GardenHomeView({super.key});
@@ -15,6 +16,7 @@ class GardenHomeView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hierarchy = ref.watch(hierarchyControllerProvider);
     final ideas = ref.watch(ideaControllerProvider);
+    final groups = ref.watch(ideaGroupControllerProvider);
 
     if (hierarchy.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -40,18 +42,33 @@ class GardenHomeView extends ConsumerWidget {
       );
     }
 
-    return _IdeasView(state: ideas);
+    return _IdeasView(state: ideas, groupState: groups);
   }
 }
 
 class _IdeasView extends ConsumerWidget {
-  const _IdeasView({required this.state});
+  const _IdeasView({required this.state, required this.groupState});
 
   final IdeaState state;
+  final IdeaGroupState groupState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(ideaControllerProvider.notifier);
+    final groupController = ref.read(ideaGroupControllerProvider.notifier);
+    final visibleIdeas = state.searchQuery.trim().isNotEmpty
+        ? state.ideas
+        : switch (groupState.filter) {
+            IdeaGroupFilter.all => state.ideas,
+            IdeaGroupFilter.ungrouped =>
+              state.ideas
+                  .where((idea) => idea.groupId == null)
+                  .toList(growable: false),
+            IdeaGroupFilter.group =>
+              state.ideas
+                  .where((idea) => idea.groupId == groupState.selectedGroupId)
+                  .toList(growable: false),
+          };
     return Padding(
       key: const Key('ideas-view'),
       padding: const EdgeInsets.all(20),
@@ -68,12 +85,63 @@ class _IdeasView extends ConsumerWidget {
               ),
               FilledButton.icon(
                 key: const Key('new-idea-button'),
-                onPressed: () => _capture(context, controller),
+                onPressed: () => _capture(context, controller, groupController),
                 icon: const Icon(Icons.add),
                 label: const Text('New Idea'),
               ),
             ],
           ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              ChoiceChip(
+                label: const Text('All Ideas'),
+                selected: groupState.filter == IdeaGroupFilter.all,
+                onSelected: (_) => groupController.showAll(),
+              ),
+              ChoiceChip(
+                label: const Text('Ungrouped'),
+                selected: groupState.filter == IdeaGroupFilter.ungrouped,
+                onSelected: (_) => groupController.showUngrouped(),
+              ),
+              for (final group in groupState.groups)
+                ChoiceChip(
+                  key: ValueKey('idea-group-${group.id.value}'),
+                  label: Text(group.name),
+                  selected:
+                      groupState.filter == IdeaGroupFilter.group &&
+                      groupState.selectedGroupId == group.id,
+                  onSelected: (_) => groupController.showGroup(group.id),
+                ),
+              OutlinedButton.icon(
+                key: const Key('create-idea-group'),
+                onPressed: () => _nameGroup(context, groupController),
+                icon: const Icon(Icons.create_new_folder_outlined),
+                label: const Text('New Group'),
+              ),
+              if (groupState.filter == IdeaGroupFilter.group)
+                PopupMenuButton<String>(
+                  tooltip: 'Group actions',
+                  onSelected: (action) =>
+                      _groupAction(context, ref, groupController, action),
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(value: 'rename', child: Text('Rename Group')),
+                    PopupMenuItem(
+                      value: 'archive',
+                      child: Text('Archive Group'),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          if (state.searchQuery.trim().isNotEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text('Search includes every active Idea in this App.'),
+            ),
           const SizedBox(height: 14),
           TextField(
             key: const Key('idea-search-field'),
@@ -90,7 +158,7 @@ class _IdeasView extends ConsumerWidget {
           Expanded(
             child: state.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : state.ideas.isEmpty
+                : visibleIdeas.isEmpty
                 ? Center(
                     child: Text(
                       state.searchQuery.isEmpty
@@ -99,16 +167,21 @@ class _IdeasView extends ConsumerWidget {
                     ),
                   )
                 : ListView.separated(
-                    itemCount: state.ideas.length,
+                    itemCount: visibleIdeas.length,
                     separatorBuilder: (_, _) => const Divider(height: 1),
                     itemBuilder: (context, index) => _IdeaTile(
-                      idea: state.ideas[index],
+                      idea: visibleIdeas[index],
+                      groups: groupState.groups,
                       onOpen: () =>
-                          context.go('/idea/${state.ideas[index].id.value}'),
+                          context.go('/idea/${visibleIdeas[index].id.value}'),
+                      onMove: (groupId) => controller.moveToGroup(
+                        visibleIdeas[index].id,
+                        groupId,
+                      ),
                       onArchive: () => _confirmArchive(
                         context,
                         controller,
-                        state.ideas[index],
+                        visibleIdeas[index],
                       ),
                     ),
                   ),
@@ -118,9 +191,91 @@ class _IdeasView extends ConsumerWidget {
     );
   }
 
-  Future<void> _capture(BuildContext context, IdeaController controller) async {
+  Future<void> _nameGroup(
+    BuildContext context,
+    IdeaGroupController controller, {
+    IdeaGroup? group,
+  }) async {
+    var enteredName = group?.name ?? '';
+    final name = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(group == null ? 'New Idea Group' : 'Rename Idea Group'),
+        content: TextFormField(
+          key: const Key('idea-group-name-field'),
+          initialValue: enteredName,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Name'),
+          onChanged: (value) => enteredName = value,
+          onFieldSubmitted: (value) => Navigator.pop(dialogContext, value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, enteredName),
+            child: Text(group == null ? 'Create' : 'Rename'),
+          ),
+        ],
+      ),
+    );
+    if (name == null || name.trim().isEmpty) return;
+    if (group == null) {
+      await controller.create(name);
+    } else {
+      await controller.rename(group.id, name);
+    }
+  }
+
+  Future<void> _groupAction(
+    BuildContext context,
+    WidgetRef ref,
+    IdeaGroupController controller,
+    String action,
+  ) async {
+    final id = groupState.selectedGroupId;
+    if (id == null) return;
+    final group = groupState.groups.where((item) => item.id == id).first;
+    if (action == 'rename') {
+      await _nameGroup(context, controller, group: group);
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Archive Idea Group?'),
+        content: Text(
+          '“${group.name}” will be archived. Its Ideas will remain and become Ungrouped.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            key: const Key('confirm-archive-group'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Archive'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await controller.archive(id);
+      await ref.read(ideaControllerProvider.notifier).refresh();
+    }
+  }
+
+  Future<void> _capture(
+    BuildContext context,
+    IdeaController controller,
+    IdeaGroupController groupController,
+  ) async {
     try {
       final idea = await controller.capture();
+      groupController.showUngrouped();
       if (context.mounted) context.go('/idea/${idea.id.value}');
     } catch (_) {
       // The controller exposes the concise user-facing failure.
@@ -159,11 +314,15 @@ class _IdeaTile extends StatelessWidget {
     required this.idea,
     required this.onOpen,
     required this.onArchive,
+    required this.groups,
+    required this.onMove,
   });
 
   final Idea idea;
   final VoidCallback onOpen;
   final VoidCallback onArchive;
+  final List<IdeaGroup> groups;
+  final Future<void> Function(EntityId? groupId) onMove;
 
   @override
   Widget build(BuildContext context) {
@@ -181,10 +340,32 @@ class _IdeaTile extends StatelessWidget {
         title: Text(idea.title),
         subtitle: Text('Updated $updated'),
         onTap: onOpen,
-        trailing: IconButton(
-          tooltip: 'Archive ${idea.title}',
-          onPressed: onArchive,
-          icon: const Icon(Icons.archive_outlined),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PopupMenuButton<String>(
+              tooltip: 'Move ${idea.title}',
+              onSelected: (groupId) =>
+                  unawaited(onMove(groupId.isEmpty ? null : EntityId(groupId))),
+              itemBuilder: (_) => [
+                const PopupMenuItem<String>(
+                  value: '',
+                  child: Text('Ungrouped'),
+                ),
+                for (final group in groups)
+                  PopupMenuItem<String>(
+                    value: group.id.value,
+                    child: Text(group.name),
+                  ),
+              ],
+              icon: const Icon(Icons.drive_file_move_outline),
+            ),
+            IconButton(
+              tooltip: 'Archive ${idea.title}',
+              onPressed: onArchive,
+              icon: const Icon(Icons.archive_outlined),
+            ),
+          ],
         ),
       ),
     );
