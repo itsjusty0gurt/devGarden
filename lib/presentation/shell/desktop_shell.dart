@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/preferences/shell_preferences.dart';
+import '../branding/devgarden_logo.dart';
 import '../garden/content_block_controller.dart';
 import '../garden/hierarchy_controller.dart';
 import '../garden/idea_controller.dart';
@@ -264,9 +265,25 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
         'Use the Ideas search field for title and block-content search in the current App.',
   );
 
-  Future<void> _showAbout() => _showMessageDialog(
-    title: 'About devGarden',
-    message: 'devGarden\nWhere ideas grow!\n\nLocal capture-first Ideas.',
+  Future<void> _showAbout() => showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('About devGarden'),
+      content: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          BrandLogo(),
+          SizedBox(height: 20),
+          Text('Local capture-first Ideas.'),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: const Text('Close'),
+        ),
+      ],
+    ),
   );
 
   Future<void> _showMessageDialog({

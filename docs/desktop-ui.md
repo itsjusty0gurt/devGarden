@@ -4,6 +4,8 @@
 
 The desktop shell uses a traditional menu bar, optional context-aware toolbar, persistent Project Explorer, draggable divider, large work area, and bottom status bar. The work area receives most of the window.
 
+The supplied two-leaf devGarden mark is the application icon and the in-product brand mark. It appears in the Project Explorer header and in the About surface alongside the exact product name and motto.
+
 ```text
 ┌────────────────────────────────────────────────────────────────┐
 │ File  Edit  Projects  Tools  Help                              │

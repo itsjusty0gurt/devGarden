@@ -1,5 +1,7 @@
 # devGarden
 
+<img src="assets/branding/devgarden_mark.png" alt="devGarden two-leaf mark" width="128">
+
 **Where ideas grow!**
 
 devGarden is a developer-focused workspace for capturing, organizing, connecting, planning, and developing programming ideas without interrupting the creative process. It is designed to work alongside IDEs, source control, and coding assistants rather than replace them.

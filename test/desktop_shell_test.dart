@@ -21,6 +21,10 @@ void main() {
     expect(find.byKey(const Key('menu-bar-region')), findsOneWidget);
     expect(find.byKey(const Key('toolbar-region')), findsOneWidget);
     expect(find.byKey(const Key('project-explorer-region')), findsOneWidget);
+    expect(
+      find.byKey(const Key('devgarden-project-explorer-mark')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('explorer-divider')), findsOneWidget);
     expect(find.byKey(const Key('work-area-region')), findsOneWidget);
     expect(find.byKey(const Key('status-bar-region')), findsOneWidget);

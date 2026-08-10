@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/models/entities.dart';
+import '../branding/devgarden_logo.dart';
 import '../garden/content_block_controller.dart';
 import '../garden/hierarchy_controller.dart';
 import '../garden/idea_controller.dart';
@@ -31,6 +32,11 @@ class ProjectExplorer extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(12, 8, 4, 6),
             child: Row(
               children: [
+                const BrandMark(
+                  key: Key('devgarden-project-explorer-mark'),
+                  size: 22,
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'PROJECT EXPLORER',
