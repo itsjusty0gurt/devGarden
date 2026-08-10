@@ -1,17 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/models/entities.dart';
+import '../garden/content_block_controller.dart';
 import '../garden/hierarchy_controller.dart';
+import '../garden/idea_controller.dart';
+import '../garden/idea_group_controller.dart';
+import '../garden/idea_workspace_controller.dart';
+import 'explorer_tree.dart';
 
 class ProjectExplorer extends ConsumerWidget {
   const ProjectExplorer({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(hierarchyControllerProvider);
-    final controller = ref.read(hierarchyControllerProvider.notifier);
+    final hierarchy = ref.watch(hierarchyControllerProvider);
+    final liveIdeas = ref.watch(ideaControllerProvider);
+    final liveGroups = ref.watch(ideaGroupControllerProvider);
+    final hierarchyController = ref.read(hierarchyControllerProvider.notifier);
     final colors = Theme.of(context).colorScheme;
     return Material(
       color: colors.surfaceContainerLowest,
@@ -35,13 +44,14 @@ class ProjectExplorer extends ConsumerWidget {
                 IconButton(
                   key: const Key('create-workspace-button'),
                   tooltip: 'Create Workspace',
-                  onPressed: () => _createWorkspace(context, controller),
+                  onPressed: () =>
+                      _createWorkspace(context, hierarchyController),
                   icon: const Icon(Icons.create_new_folder_outlined, size: 18),
                 ),
               ],
             ),
           ),
-          if (state.errorMessage case final message?)
+          if (hierarchy.errorMessage case final message?)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
@@ -50,9 +60,9 @@ class ProjectExplorer extends ConsumerWidget {
               ),
             ),
           Expanded(
-            child: state.isLoading
+            child: hierarchy.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : state.workspaces.isEmpty
+                : hierarchy.workspaces.isEmpty
                 ? Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -64,7 +74,7 @@ class ProjectExplorer extends ConsumerWidget {
                           FilledButton.icon(
                             key: const Key('empty-create-workspace-button'),
                             onPressed: () =>
-                                _createWorkspace(context, controller),
+                                _createWorkspace(context, hierarchyController),
                             icon: const Icon(Icons.add),
                             label: const Text('Create Workspace'),
                           ),
@@ -72,11 +82,15 @@ class ProjectExplorer extends ConsumerWidget {
                       ),
                     ),
                   )
-                : ListView(
-                    children: [
-                      for (final workspace in state.workspaces)
-                        _workspaceNode(context, state, controller, workspace),
-                    ],
+                : ExplorerTree(
+                    nodes: _nodes(
+                      context,
+                      ref,
+                      hierarchy,
+                      liveIdeas,
+                      liveGroups,
+                      hierarchyController,
+                    ),
                   ),
           ),
         ],
@@ -84,88 +98,186 @@ class ProjectExplorer extends ConsumerWidget {
     );
   }
 
-  Widget _workspaceNode(
+  List<ExplorerNode> _nodes(
     BuildContext context,
-    HierarchyState state,
+    WidgetRef ref,
+    HierarchyState hierarchy,
+    IdeaState liveIdeas,
+    IdeaGroupState liveGroups,
     HierarchyController controller,
-    Workspace workspace,
   ) {
-    final projects = state.projectsFor(workspace.id);
-    return ExpansionTile(
-      key: ValueKey('workspace-${workspace.id.value}'),
-      initiallyExpanded: true,
-      leading: const Icon(Icons.workspaces_outline, size: 18),
-      title: Text(workspace.name),
-      trailing: IconButton(
-        tooltip: 'Create Project in ${workspace.name}',
-        onPressed: () => _createProject(context, controller, workspace.id),
-        icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-      ),
-      children: [
-        if (projects.isEmpty)
-          _createTile(
-            label: 'Create Project',
-            key: Key('create-project-${workspace.id.value}'),
-            onTap: () => _createProject(context, controller, workspace.id),
+    return [
+      for (final workspace in hierarchy.workspaces)
+        ExplorerNode(
+          key: 'workspace-${workspace.id.value}',
+          type: ExplorerNodeType.workspace,
+          title: workspace.name,
+          icon: Icons.workspaces_outline,
+          trailing: IconButton(
+            tooltip: 'Create Project in ${workspace.name}',
+            onPressed: () => _createProject(context, controller, workspace.id),
+            icon: const Icon(Icons.create_new_folder_outlined, size: 16),
           ),
-        for (final project in projects)
-          _projectNode(context, state, controller, project),
-      ],
-    );
+          children: [
+            for (final project in hierarchy.projectsFor(workspace.id))
+              ExplorerNode(
+                key: 'project-${project.id.value}',
+                type: ExplorerNodeType.project,
+                title: project.name,
+                icon: Icons.folder_outlined,
+                trailing: IconButton(
+                  tooltip: 'Create App in ${project.name}',
+                  onPressed: () => _createApp(context, controller, project.id),
+                  icon: const Icon(Icons.add_box_outlined, size: 16),
+                ),
+                children: [
+                  for (final app in hierarchy.appsFor(project.id))
+                    _appNode(
+                      context,
+                      ref,
+                      hierarchy,
+                      liveIdeas,
+                      liveGroups,
+                      controller,
+                      app,
+                    ),
+                  if (hierarchy.appsFor(project.id).isEmpty)
+                    ExplorerNode(
+                      key: 'create-app-${project.id.value}',
+                      type: ExplorerNodeType.action,
+                      title: 'Create App',
+                      icon: Icons.add,
+                      onActivate: () =>
+                          _createApp(context, controller, project.id),
+                    ),
+                ],
+              ),
+            if (hierarchy.projectsFor(workspace.id).isEmpty)
+              ExplorerNode(
+                key: 'create-project-${workspace.id.value}',
+                type: ExplorerNodeType.action,
+                title: 'Create Project',
+                icon: Icons.add,
+                onActivate: () =>
+                    _createProject(context, controller, workspace.id),
+              ),
+          ],
+        ),
+    ];
   }
 
-  Widget _projectNode(
+  ExplorerNode _appNode(
     BuildContext context,
-    HierarchyState state,
+    WidgetRef ref,
+    HierarchyState hierarchy,
+    IdeaState liveIdeas,
+    IdeaGroupState liveGroups,
     HierarchyController controller,
-    Project project,
+    GardenApp app,
   ) {
-    final apps = state.appsFor(project.id);
-    return ExpansionTile(
-      key: ValueKey('project-${project.id.value}'),
-      initiallyExpanded: true,
-      leading: const Icon(Icons.folder_outlined, size: 18),
-      title: Text(project.name),
-      trailing: IconButton(
-        tooltip: 'Create App in ${project.name}',
-        onPressed: () => _createApp(context, controller, project.id),
-        icon: const Icon(Icons.add_box_outlined, size: 18),
-      ),
+    final isLive =
+        hierarchy.selectedAppId == app.id && liveIdeas.appId == app.id;
+    final ideas = isLive ? liveIdeas.allIdeas : hierarchy.ideasFor(app.id);
+    final groups = isLive && liveGroups.appId == app.id
+        ? liveGroups.groups
+        : hierarchy.groupsFor(app.id);
+    final ungrouped = ideas.where((idea) => idea.groupId == null).toList();
+    return ExplorerNode(
+      key: 'app-${app.id.value}',
+      type: ExplorerNodeType.app,
+      title: app.name,
+      icon: Icons.apps_outlined,
+      selected: hierarchy.selectedAppId == app.id,
+      onActivate: () async {
+        await _selectApp(ref, controller, app.id);
+        ref.read(ideaGroupControllerProvider.notifier).showAll();
+        if (context.mounted) context.go('/app');
+      },
       children: [
-        if (apps.isEmpty)
-          _createTile(
-            label: 'Create App',
-            key: Key('create-app-${project.id.value}'),
-            onTap: () => _createApp(context, controller, project.id),
-          ),
-        for (final app in apps)
-          ListTile(
-            key: ValueKey('app-${app.id.value}'),
-            dense: true,
-            selected: state.selectedAppId == app.id,
-            leading: const Icon(Icons.apps_outlined, size: 18),
-            title: Text(app.name),
-            onTap: () {
-              controller.selectApp(app.id);
-              context.go('/app');
+        for (final group in groups)
+          ExplorerNode(
+            key: 'group-${group.id.value}',
+            type: ExplorerNodeType.ideaGroup,
+            title: group.name,
+            icon: Icons.folder_open_outlined,
+            selected:
+                hierarchy.selectedAppId == app.id &&
+                liveGroups.filter == IdeaGroupFilter.group &&
+                liveGroups.selectedGroupId == group.id,
+            onActivate: () async {
+              await _selectApp(ref, controller, app.id);
+              ref
+                  .read(ideaGroupControllerProvider.notifier)
+                  .showGroup(group.id);
+              if (context.mounted) context.go('/app');
             },
+            children: [
+              for (final idea in ideas.where(
+                (idea) => idea.groupId == group.id,
+              ))
+                _ideaNode(context, ref, controller, app.id, idea),
+            ],
+          ),
+        if (ungrouped.isNotEmpty)
+          ExplorerNode(
+            key: 'ungrouped-${app.id.value}',
+            type: ExplorerNodeType.ungrouped,
+            title: 'Ungrouped',
+            icon: Icons.inbox_outlined,
+            selected:
+                hierarchy.selectedAppId == app.id &&
+                liveGroups.filter == IdeaGroupFilter.ungrouped,
+            onActivate: () async {
+              await _selectApp(ref, controller, app.id);
+              ref.read(ideaGroupControllerProvider.notifier).showUngrouped();
+              if (context.mounted) context.go('/app');
+            },
+            children: [
+              for (final idea in ungrouped)
+                _ideaNode(context, ref, controller, app.id, idea),
+            ],
           ),
       ],
     );
   }
 
-  Widget _createTile({
-    required String label,
-    required Key key,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      key: key,
-      dense: true,
-      leading: const Icon(Icons.add, size: 18),
-      title: Text(label),
-      onTap: onTap,
+  ExplorerNode _ideaNode(
+    BuildContext context,
+    WidgetRef ref,
+    HierarchyController hierarchy,
+    EntityId appId,
+    Idea idea,
+  ) {
+    return ExplorerNode(
+      key: 'explorer-idea-${idea.id.value}',
+      type: ExplorerNodeType.idea,
+      title: idea.title,
+      icon: Icons.lightbulb_outline,
+      onActivate: () async {
+        await _selectApp(ref, hierarchy, appId);
+        final groups = ref.read(ideaGroupControllerProvider.notifier);
+        if (idea.groupId case final groupId?) {
+          groups.showGroup(groupId);
+        } else {
+          groups.showUngrouped();
+        }
+        ref.read(ideaWorkspaceControllerProvider.notifier).reveal(idea.id);
+        if (context.mounted) context.go('/app');
+      },
     );
+  }
+
+  Future<void> _selectApp(
+    WidgetRef ref,
+    HierarchyController hierarchy,
+    EntityId appId,
+  ) async {
+    await ref.read(contentBlockSessionCoordinatorProvider.notifier).flushAll();
+    hierarchy.selectApp(appId);
+    await Future.wait([
+      ref.read(ideaControllerProvider.notifier).selectApp(appId),
+      ref.read(ideaGroupControllerProvider.notifier).selectApp(appId),
+    ]);
   }
 
   Future<void> _createWorkspace(
@@ -226,7 +338,7 @@ class ProjectExplorer extends ConsumerWidget {
     required Key fieldKey,
   }) async {
     var name = '';
-    final result = await showDialog<String>(
+    return showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(title),
@@ -247,15 +359,12 @@ class ProjectExplorer extends ConsumerWidget {
           FilledButton(
             key: const Key('confirm-name-button'),
             onPressed: () {
-              if (name.trim().isNotEmpty) {
-                Navigator.pop(dialogContext, name);
-              }
+              if (name.trim().isNotEmpty) Navigator.pop(dialogContext, name);
             },
             child: const Text('Create'),
           ),
         ],
       ),
     );
-    return result;
   }
 }

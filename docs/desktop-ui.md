@@ -19,7 +19,7 @@ The desktop shell uses a traditional menu bar, optional context-aware toolbar, p
 
 ## Project Explorer
 
-The explorer is always available in the desktop layout, resizable, and placeable on either side. Its side and width persist. It uses familiar tree expand/collapse and keyboard interactions for `Workspace → Project → App → optional Idea Group → Idea`. Contextual actions should eventually include create, rename, move, duplicate, archive, and properties.
+The explorer is always available in the desktop layout, resizable, and placeable on either side. Its side and width persist. The implemented developer tree renders the persisted `Workspace → Project → App → optional Idea Group → Idea` hierarchy with staggered indentation and subtle parent, sibling-continuation, and last-child connector lines. Ungrouped Ideas appear under an `Ungrouped` node when present. Workspace, Project, App, Idea Group, and Ungrouped nodes expand or collapse in presentation state; Idea selection reveals and focuses the matching container in the work area. Arrow keys navigate or expand the tree, Enter activates a row, and accessible expand/collapse labels accompany visible focus and selection states. Contextual actions should eventually include create, rename, move, duplicate, archive, and properties.
 
 “Always available” does not require the explorer to consume permanent screen space at every width. Narrow layouts may collapse, overlay, or temporarily hide it, but a predictable visible control or keyboard action must restore it immediately. The explorer must never become permanently unavailable.
 
@@ -55,7 +55,9 @@ These controls must appear or become enabled only when they are relevant to the 
 
 ## Idea pinboard
 
-An App or Idea Group Ideas view supports contained internal windows or cards. Planned actions include move, resize, bring to front, collapse to the title bar, restore, minimize or collapse without losing content, maximize within the work area, focused edit, duplicate, move, and archive.
+The implemented App and Idea Group Ideas view is a vertically stacked, single-scroll workspace. Multiple Ideas may be expanded simultaneously; each expanded container hosts the existing block editor, while collapse retains a compact title and updated-time header without discarding content or editor-session history. New Idea capture expands and focuses its initial Paragraph immediately. Search and Explorer selection reveal the matching Idea, and a focused single-Idea route remains available. Collapse state is presentation-only and is not stored in domain tables.
+
+This stacked workspace is an incremental daily-use surface, not the future pinboard. It has no freeform coordinates, floating windows, resize handles, z-order, snapping, or always-on-top behavior. Planned pinboard actions remain move, resize, bring to front, collapse to the title bar, restore, minimize or collapse without losing content, maximize within the work area, focused edit, duplicate, move, and archive.
 
 Pinning or “always on top” applies only inside the devGarden work area. It may keep an Idea above other contained Idea windows, but must never place it above unrelated operating-system windows.
 

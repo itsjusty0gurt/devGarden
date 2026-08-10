@@ -490,16 +490,27 @@ class DriftContentBlockRepository implements ContentBlockRepository {
 
   @override
   Future<void> softDelete(domain.EntityId id, DateTime updatedAt) async {
+    await setDeleted(id, isDeleted: true, updatedAt: updatedAt);
+  }
+
+  @override
+  Future<void> setDeleted(
+    domain.EntityId id, {
+    required bool isDeleted,
+    required DateTime updatedAt,
+  }) async {
     final changed =
         await (_database.update(
           _database.contentBlocks,
         )..where((row) => row.id.equals(id.value))).write(
           ContentBlocksCompanion(
-            isDeleted: const Value(true),
+            isDeleted: Value(isDeleted),
             updatedAt: Value(updatedAt),
           ),
         );
-    if (changed != 1) throw StateError('The block could not be deleted.');
+    if (changed != 1) {
+      throw StateError('The block deletion state could not be changed.');
+    }
   }
 }
 

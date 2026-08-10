@@ -71,6 +71,14 @@ class ContentBlockService {
     return _blocks.softDelete(id, _clock().toUtc());
   }
 
+  Future<void> setDeleted(EntityId id, bool isDeleted) {
+    return _blocks.setDeleted(
+      id,
+      isDeleted: isDeleted,
+      updatedAt: _clock().toUtc(),
+    );
+  }
+
   static Map<String, Object?> defaultMetadata(ContentBlockType type) {
     return switch (type) {
       ContentBlockType.heading => const {'level': 1},
@@ -86,6 +94,85 @@ class BlockInputCommand {
 
   final ContentBlockType type;
   final Map<String, Object?> metadata;
+}
+
+class BlockCommandOption {
+  const BlockCommandOption({
+    required this.label,
+    required this.command,
+    required this.result,
+    this.searchTerms = const [],
+  });
+
+  final String label;
+  final String command;
+  final BlockInputCommand result;
+  final List<String> searchTerms;
+}
+
+final blockCommandOptions = <BlockCommandOption>[
+  for (final entry in const <String, ContentBlockType>{
+    '/paragraph': ContentBlockType.paragraph,
+    '/heading': ContentBlockType.heading,
+    '/code': ContentBlockType.code,
+    '/checklist': ContentBlockType.checklist,
+    '/bullets': ContentBlockType.bulletList,
+    '/numbered': ContentBlockType.numberedList,
+    '/quote': ContentBlockType.quote,
+    '/divider': ContentBlockType.divider,
+  }.entries)
+    BlockCommandOption(
+      label: switch (entry.value) {
+        ContentBlockType.paragraph => 'Paragraph',
+        ContentBlockType.heading => 'Heading',
+        ContentBlockType.code => 'Code',
+        ContentBlockType.checklist => 'Checklist',
+        ContentBlockType.bulletList => 'Bulleted List',
+        ContentBlockType.numberedList => 'Numbered List',
+        ContentBlockType.quote => 'Quote',
+        ContentBlockType.divider => 'Divider',
+      },
+      command: entry.key,
+      result: BlockInputCommand(
+        entry.value,
+        ContentBlockService.defaultMetadata(entry.value),
+      ),
+    ),
+  ...const <(String, String, String)>[
+    ('C#', '/csharp', 'csharp'),
+    ('Python', '/python', 'python'),
+    ('JavaScript', '/javascript', 'javascript'),
+    ('TypeScript', '/typescript', 'typescript'),
+    ('SQL', '/sql', 'sql'),
+    ('JSON', '/json', 'json'),
+    ('HTML', '/html', 'html'),
+    ('CSS', '/css', 'css'),
+    ('Dart', '/dart', 'dart'),
+  ].map(
+    (entry) => BlockCommandOption(
+      label: 'Code â€” ${entry.$1}',
+      command: entry.$2,
+      result: BlockInputCommand(ContentBlockType.code, {'language': entry.$3}),
+      searchTerms: switch (entry.$3) {
+        'csharp' => const ['cs', 'c#'],
+        'javascript' => const ['js'],
+        'typescript' => const ['ts'],
+        _ => const [],
+      },
+    ),
+  ),
+];
+
+List<BlockCommandOption> filterBlockCommands(String input) {
+  final query = input.trim().toLowerCase().replaceFirst('/', '');
+  return blockCommandOptions.where((option) {
+    final values = [
+      option.label.toLowerCase(),
+      option.command.substring(1),
+      ...option.searchTerms,
+    ];
+    return query.isEmpty || values.any((value) => value.startsWith(query));
+  }).toList();
 }
 
 BlockInputCommand? parseBlockInputCommand(String input) {

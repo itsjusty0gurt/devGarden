@@ -28,11 +28,10 @@ class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
   void initState() {
     super.initState();
     _ideaController = ref.read(ideaControllerProvider.notifier);
-    _blockController = ref.read(contentBlockControllerProvider.notifier);
+    final id = EntityId(widget.ideaId);
+    _blockController = ref.read(contentBlockControllerProvider(id).notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final id = EntityId(widget.ideaId);
       unawaited(_ideaController.open(id));
-      unawaited(_blockController.openIdea(id));
     });
   }
 
@@ -111,7 +110,7 @@ class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
     BuildContext context,
     IdeaController controller,
   ) async {
-    await Future.wait([controller.flush(), _blockController.flush()]);
+    await Future.wait([controller.flush(), _blockController.prepareToLeave()]);
     if (context.mounted) context.go('/app');
   }
 
@@ -140,7 +139,7 @@ class _IdeaEditorViewState extends ConsumerState<IdeaEditorView> {
       ),
     );
     if (confirmed == true) {
-      await _blockController.flush();
+      await _blockController.prepareToLeave();
       await controller.softDelete(idea.id);
       if (context.mounted) context.go('/app');
     }

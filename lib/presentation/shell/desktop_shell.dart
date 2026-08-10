@@ -10,6 +10,7 @@ import '../garden/content_block_controller.dart';
 import '../garden/hierarchy_controller.dart';
 import '../garden/idea_controller.dart';
 import '../garden/idea_group_controller.dart';
+import '../garden/idea_workspace_controller.dart';
 import 'project_explorer.dart';
 import 'shell_controller.dart';
 import 'shell_menu_bar.dart';
@@ -34,7 +35,10 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
   Widget build(BuildContext context) {
     final shellState = ref.watch(shellControllerProvider);
     final ideaState = ref.watch(ideaControllerProvider);
-    final blockState = ref.watch(contentBlockControllerProvider);
+    final activeBlockIdeaId = ref.watch(contentBlockSessionCoordinatorProvider);
+    final blockState = activeBlockIdeaId == null
+        ? const ContentBlockEditorState()
+        : ref.watch(contentBlockControllerProvider(activeBlockIdeaId));
 
     return CallbackShortcuts(
       bindings: {
@@ -64,7 +68,7 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
           body: SafeArea(
             child: Column(
               children: [
-                ShellMenuBar(actions: _menuActions()),
+                ShellMenuBar(actions: _menuActions(blockState)),
                 const Divider(height: 1),
                 ShellToolbar(
                   explorerHidden: _explorerTemporarilyHidden,
@@ -75,8 +79,8 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
                   },
                   onNew: () => unawaited(_newIdea()),
                   onSave: () => unawaited(_save()),
-                  onUndo: null,
-                  onRedo: null,
+                  onUndo: blockState.canUndo ? () => unawaited(_undo()) : null,
+                  onRedo: blockState.canRedo ? () => unawaited(_redo()) : null,
                   onSearch: () => context.go('/app'),
                   onZoomOut: () =>
                       _controller.fireAndForget(_controller.changeZoom(-0.1)),
@@ -182,11 +186,15 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
     );
   }
 
-  ShellMenuActions _menuActions() {
+  ShellMenuActions _menuActions(ContentBlockEditorState blockState) {
     return ShellMenuActions(
       placeholder: _controller.placeholder,
       newIdea: () => unawaited(_newIdea()),
       save: () => unawaited(_save()),
+      undo: () => unawaited(_undo()),
+      redo: () => unawaited(_redo()),
+      canUndo: blockState.canUndo,
+      canRedo: blockState.canRedo,
       openSettings: () => context.go('/settings'),
       commandPalette: () => unawaited(_showCommandPalette()),
       quickOpen: () => unawaited(_showQuickOpen()),
@@ -295,11 +303,12 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
     try {
       await Future.wait([
         ref.read(ideaControllerProvider.notifier).flush(),
-        ref.read(contentBlockControllerProvider.notifier).flush(),
+        ref.read(contentBlockSessionCoordinatorProvider.notifier).flushAll(),
       ]);
       final idea = await ref.read(ideaControllerProvider.notifier).capture();
       ref.read(ideaGroupControllerProvider.notifier).showUngrouped();
-      if (mounted) context.go('/idea/${idea.id.value}');
+      ref.read(ideaWorkspaceControllerProvider.notifier).reveal(idea.id);
+      if (mounted) context.go('/app');
     } catch (_) {
       _controller.setStatus('Idea creation failed.');
     }
@@ -310,15 +319,22 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
     final isEditingIdea = GoRouterState.of(
       context,
     ).uri.path.startsWith('/idea/');
-    if (!isEditingIdea || ideas.current == null) {
+    final sessions = ref.read(contentBlockSessionCoordinatorProvider.notifier);
+    if (!isEditingIdea && ideas.current == null && !sessions.hasSessions) {
       _controller.saveUnavailable();
       return;
     }
     await Future.wait([
       ref.read(ideaControllerProvider.notifier).flush(),
-      ref.read(contentBlockControllerProvider.notifier).flush(),
+      sessions.flushAll(),
     ]);
   }
+
+  Future<void> _undo() =>
+      ref.read(contentBlockSessionCoordinatorProvider.notifier).undoActive();
+
+  Future<void> _redo() =>
+      ref.read(contentBlockSessionCoordinatorProvider.notifier).redoActive();
 
   String _themeModeLabel(ThemeMode mode) {
     return switch (mode) {

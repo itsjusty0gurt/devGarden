@@ -60,4 +60,9 @@ abstract interface class ContentBlockRepository {
     required DateTime updatedAt,
   });
   Future<void> softDelete(EntityId id, DateTime updatedAt);
+  Future<void> setDeleted(
+    EntityId id, {
+    required bool isDeleted,
+    required DateTime updatedAt,
+  });
 }

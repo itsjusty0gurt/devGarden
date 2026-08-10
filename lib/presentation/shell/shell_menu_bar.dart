@@ -6,6 +6,10 @@ class ShellMenuActions {
     required this.placeholder,
     required this.newIdea,
     required this.save,
+    required this.undo,
+    required this.redo,
+    required this.canUndo,
+    required this.canRedo,
     required this.openSettings,
     required this.commandPalette,
     required this.quickOpen,
@@ -18,6 +22,10 @@ class ShellMenuActions {
   final ValueChanged<String> placeholder;
   final VoidCallback newIdea;
   final VoidCallback save;
+  final VoidCallback undo;
+  final VoidCallback redo;
+  final bool canUndo;
+  final bool canRedo;
   final VoidCallback openSettings;
   final VoidCallback commandPalette;
   final VoidCallback quickOpen;
@@ -79,8 +87,22 @@ class ShellMenuBar extends StatelessWidget {
             ),
             SubmenuButton(
               menuChildren: [
-                const MenuItemButton(onPressed: null, child: Text('Undo')),
-                const MenuItemButton(onPressed: null, child: Text('Redo')),
+                MenuItemButton(
+                  onPressed: actions.canUndo ? actions.undo : null,
+                  shortcut: const SingleActivator(
+                    LogicalKeyboardKey.keyZ,
+                    control: true,
+                  ),
+                  child: const Text('Undo'),
+                ),
+                MenuItemButton(
+                  onPressed: actions.canRedo ? actions.redo : null,
+                  shortcut: const SingleActivator(
+                    LogicalKeyboardKey.keyY,
+                    control: true,
+                  ),
+                  child: const Text('Redo'),
+                ),
                 const Divider(),
                 const MenuItemButton(onPressed: null, child: Text('Cut')),
                 const MenuItemButton(onPressed: null, child: Text('Copy')),

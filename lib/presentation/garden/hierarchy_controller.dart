@@ -13,6 +13,8 @@ class HierarchyState {
     this.workspaces = const [],
     this.projects = const [],
     this.apps = const [],
+    this.ideaGroups = const [],
+    this.ideas = const [],
     this.selectedWorkspaceId,
     this.selectedProjectId,
     this.selectedAppId,
@@ -23,6 +25,8 @@ class HierarchyState {
   final List<Workspace> workspaces;
   final List<Project> projects;
   final List<GardenApp> apps;
+  final List<IdeaGroup> ideaGroups;
+  final List<Idea> ideas;
   final EntityId? selectedWorkspaceId;
   final EntityId? selectedProjectId;
   final EntityId? selectedAppId;
@@ -33,6 +37,8 @@ class HierarchyState {
     List<Workspace>? workspaces,
     List<Project>? projects,
     List<GardenApp>? apps,
+    List<IdeaGroup>? ideaGroups,
+    List<Idea>? ideas,
     EntityId? selectedWorkspaceId,
     EntityId? selectedProjectId,
     EntityId? selectedAppId,
@@ -45,6 +51,8 @@ class HierarchyState {
       workspaces: workspaces ?? this.workspaces,
       projects: projects ?? this.projects,
       apps: apps ?? this.apps,
+      ideaGroups: ideaGroups ?? this.ideaGroups,
+      ideas: ideas ?? this.ideas,
       selectedWorkspaceId: selectedWorkspaceId ?? this.selectedWorkspaceId,
       selectedProjectId: selectedProjectId ?? this.selectedProjectId,
       selectedAppId: clearSelectedApp
@@ -61,6 +69,12 @@ class HierarchyState {
 
   List<GardenApp> appsFor(EntityId projectId) =>
       apps.where((app) => app.projectId == projectId).toList(growable: false);
+
+  List<IdeaGroup> groupsFor(EntityId appId) =>
+      ideaGroups.where((group) => group.appId == appId).toList(growable: false);
+
+  List<Idea> ideasFor(EntityId appId) =>
+      ideas.where((idea) => idea.appId == appId).toList(growable: false);
 }
 
 final hierarchyControllerProvider =
@@ -70,6 +84,8 @@ final hierarchyControllerProvider =
         ref.watch(workspaceRepositoryProvider),
         ref.watch(projectRepositoryProvider),
         ref.watch(appRepositoryProvider),
+        ref.watch(ideaGroupRepositoryProvider),
+        ref.watch(ideaRepositoryProvider),
       );
       unawaited(controller.load());
       return controller;
@@ -87,12 +103,16 @@ class HierarchyController extends StateNotifier<HierarchyState> {
     this._workspaces,
     this._projects,
     this._apps,
+    this._ideaGroups,
+    this._ideas,
   ) : super(const HierarchyState());
 
   final HierarchyService _service;
   final WorkspaceRepository _workspaces;
   final ProjectRepository _projects;
   final AppRepository _apps;
+  final IdeaGroupRepository _ideaGroups;
+  final IdeaRepository _ideas;
 
   Future<void> load() async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -100,13 +120,20 @@ class HierarchyController extends StateNotifier<HierarchyState> {
       final workspaces = await _workspaces.listActive();
       final projects = <Project>[];
       final apps = <GardenApp>[];
+      final ideaGroups = <IdeaGroup>[];
+      final ideas = <Idea>[];
       for (final workspace in workspaces) {
         final workspaceProjects = await _projects.listActiveByWorkspace(
           workspace.id,
         );
         projects.addAll(workspaceProjects);
         for (final project in workspaceProjects) {
-          apps.addAll(await _apps.listActiveByProject(project.id));
+          final projectApps = await _apps.listActiveByProject(project.id);
+          apps.addAll(projectApps);
+          for (final app in projectApps) {
+            ideaGroups.addAll(await _ideaGroups.listActiveByApp(app.id));
+            ideas.addAll(await _ideas.listActiveByApp(app.id));
+          }
         }
       }
 
@@ -124,6 +151,8 @@ class HierarchyController extends StateNotifier<HierarchyState> {
         workspaces: workspaces,
         projects: projects,
         apps: apps,
+        ideaGroups: ideaGroups,
+        ideas: ideas,
         selectedWorkspaceId: selectedWorkspace?.id,
         selectedProjectId: selectedProject?.id,
         selectedAppId: selectedApp?.id,

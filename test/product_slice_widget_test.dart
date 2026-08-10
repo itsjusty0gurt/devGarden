@@ -37,7 +37,9 @@ void main() {
       tester.element(find.byType(DesktopShell)),
     );
     final ideaId = container.read(ideaControllerProvider).current!.id;
-    var blockState = container.read(contentBlockControllerProvider);
+    await tester.tap(find.byTooltip('Open Untitled Idea in focused editor'));
+    await tester.pumpAndSettle();
+    var blockState = container.read(contentBlockControllerProvider(ideaId));
     final paragraphId = blockState.blocks.single.id;
     final paragraphField = find.byKey(
       ValueKey('block-text-${paragraphId.value}'),
@@ -72,7 +74,7 @@ void main() {
     ]) {
       await _addBlock(tester, label);
     }
-    blockState = container.read(contentBlockControllerProvider);
+    blockState = container.read(contentBlockControllerProvider(ideaId));
     expect(
       blockState.blocks.map((block) => block.type).toSet(),
       ContentBlockType.values.toSet(),
@@ -92,7 +94,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final code = container
-        .read(contentBlockControllerProvider)
+        .read(contentBlockControllerProvider(ideaId))
         .blocks
         .firstWhere((block) => block.type == ContentBlockType.code);
     await _showBlock(tester, code.id);
@@ -121,7 +123,7 @@ void main() {
     messenger.setMockMethodCallHandler(SystemChannels.platform, null);
 
     final checklist = container
-        .read(contentBlockControllerProvider)
+        .read(contentBlockControllerProvider(ideaId))
         .blocks
         .firstWhere((block) => block.type == ContentBlockType.checklist);
     await _showBlock(tester, checklist.id);
@@ -143,7 +145,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Move Up').last);
+    await tester.tap(find.text('Move block up').last);
     await tester.pumpAndSettle();
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
@@ -174,6 +176,11 @@ void main() {
 
     await tester.tap(find.byTooltip('Back to Ideas'));
     await tester.pumpAndSettle();
+    await tester.drag(
+      find.byKey(const Key('idea-workspace-list')),
+      const Offset(0, 400),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Move Block Idea'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Research').last);
@@ -188,9 +195,7 @@ void main() {
       'return "idea"',
     );
     await tester.pumpAndSettle();
-    expect(find.text('Block Idea'), findsOneWidget);
-    await tester.tap(find.text('Block Idea'));
-    await tester.pumpAndSettle();
+    expect(find.byKey(ValueKey('idea-${ideaId.value}')), findsOneWidget);
     expect(
       tester
           .widget<TextField>(
@@ -199,6 +204,192 @@ void main() {
           .controller
           ?.text,
       exactCode,
+    );
+  });
+
+  testWidgets('editor keyboard, slash menu, undo, and focus stay predictable', (
+    tester,
+  ) async {
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    await _pumpProduct(tester, database);
+    await _createHierarchy(tester);
+    await tester.tap(find.byKey(const Key('new-idea-button')));
+    await tester.pumpAndSettle();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(DesktopShell)),
+    );
+    final ideaId = container.read(ideaControllerProvider).current!.id;
+    final controller = container.read(
+      contentBlockControllerProvider(ideaId).notifier,
+    );
+    var state = container.read(contentBlockControllerProvider(ideaId));
+    final firstId = state.blocks.single.id;
+    final firstField = find.byKey(ValueKey('block-text-${firstId.value}'));
+
+    await tester.enterText(firstField, 'inline');
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    state = container.read(contentBlockControllerProvider(ideaId));
+    expect(state.blocks, hasLength(1));
+    expect(state.blocks.single.text, 'inline\n');
+    await controller.undo();
+    expect(controller.state.blocks.single.text, isEmpty);
+    await controller.redo();
+    expect(controller.state.blocks.single.text, 'inline\n');
+
+    await tester.enterText(firstField, '/');
+    await tester.pump();
+    expect(find.byKey(const Key('slash-command-menu')), findsOneWidget);
+    expect(find.bySemanticsLabel('Add block'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(
+      container.read(contentBlockControllerProvider(ideaId)).slashSelection,
+      1,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(const Key('slash-command-menu')), findsNothing);
+    await tester.enterText(firstField, '/py');
+    await tester.pump();
+    expect(find.text('Code â€” Python'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    state = container.read(contentBlockControllerProvider(ideaId));
+    expect(state.blocks.single.type, ContentBlockType.code);
+    expect(state.blocks.single.codeLanguage, 'python');
+    final codeField = find.byKey(ValueKey('block-text-${firstId.value}'));
+    await tester.enterText(codeField, 'print("grow")\n');
+    await tester.pump();
+    expect(
+      tester.widget<TextField>(codeField).controller?.text,
+      'print("grow")\n',
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    state = container.read(contentBlockControllerProvider(ideaId));
+    expect(state.blocks, hasLength(2));
+    final paragraphId = state.blocks.last.id;
+    final paragraphField = find.byKey(
+      ValueKey('block-text-${paragraphId.value}'),
+    );
+    expect(
+      tester
+          .widget<EditableText>(
+            find.descendant(
+              of: paragraphField,
+              matching: find.byType(EditableText),
+            ),
+          )
+          .focusNode
+          .hasFocus,
+      isTrue,
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+    await tester.pumpAndSettle();
+    expect(
+      container.read(contentBlockControllerProvider(ideaId)).blocks.first.id,
+      paragraphId,
+    );
+    expect(
+      tester
+          .widget<EditableText>(
+            find.descendant(
+              of: paragraphField,
+              matching: find.byType(EditableText),
+            ),
+          )
+          .focusNode
+          .hasFocus,
+      isTrue,
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(
+      container.read(contentBlockControllerProvider(ideaId)).blocks.last.id,
+      paragraphId,
+    );
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyY);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+    expect(
+      container.read(contentBlockControllerProvider(ideaId)).blocks.first.id,
+      paragraphId,
+    );
+
+    await controller.changeType(paragraphId, ContentBlockType.heading);
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Heading level'), findsOneWidget);
+    expect(find.bySemanticsLabel('Block type and actions menu'), findsWidgets);
+    await tester.enterText(paragraphField, 'Heading');
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    expect(controller.state.blocks, hasLength(2));
+    expect(
+      controller.state.blocks
+          .firstWhere((block) => block.id == paragraphId)
+          .text,
+      'Heading\n',
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Select code language'), findsOneWidget);
+    state = container.read(contentBlockControllerProvider(ideaId));
+    expect(
+      state.blocks.firstWhere((block) => block.id == state.activeBlockId).type,
+      ContentBlockType.paragraph,
+    );
+    final checklistId = state.activeBlockId!;
+    await controller.changeType(checklistId, ContentBlockType.checklist);
+    await tester.pumpAndSettle();
+    final checklistField = find.byKey(
+      ValueKey('block-text-${checklistId.value}'),
+    );
+    await tester.enterText(checklistField, 'First line');
+    final countBeforeChecklistBreak = controller.state.blocks.length;
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    expect(controller.state.blocks, hasLength(countBeforeChecklistBreak));
+    expect(
+      controller.state.blocks
+          .firstWhere((block) => block.id == checklistId)
+          .text,
+      'First line\n',
+    );
+
+    final language = find.byKey(ValueKey('code-language-${firstId.value}'));
+    await tester.ensureVisible(language);
+    await tester.tap(language);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dart').last);
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<EditableText>(
+            find.descendant(of: codeField, matching: find.byType(EditableText)),
+          )
+          .focusNode
+          .hasFocus,
+      isTrue,
     );
   });
 }

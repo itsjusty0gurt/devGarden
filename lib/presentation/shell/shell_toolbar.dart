@@ -53,12 +53,12 @@ class ShellToolbar extends StatelessWidget {
                 onPressed: onSave,
               ),
               _button(
-                tooltip: 'Undo unavailable',
+                tooltip: onUndo == null ? 'Undo unavailable' : 'Undo',
                 icon: Icons.undo,
                 onPressed: onUndo,
               ),
               _button(
-                tooltip: 'Redo unavailable',
+                tooltip: onRedo == null ? 'Redo unavailable' : 'Redo',
                 icon: Icons.redo,
                 onPressed: onRedo,
               ),

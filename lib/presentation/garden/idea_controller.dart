@@ -16,6 +16,7 @@ class IdeaState {
   const IdeaState({
     this.appId,
     this.ideas = const [],
+    this.allIdeas = const [],
     this.current,
     this.draftTitle = '',
     this.searchQuery = '',
@@ -28,6 +29,7 @@ class IdeaState {
 
   final EntityId? appId;
   final List<Idea> ideas;
+  final List<Idea> allIdeas;
   final Idea? current;
   final String draftTitle;
   final String searchQuery;
@@ -48,6 +50,7 @@ class IdeaState {
     EntityId? appId,
     bool clearApp = false,
     List<Idea>? ideas,
+    List<Idea>? allIdeas,
     Idea? current,
     bool clearCurrent = false,
     String? draftTitle,
@@ -62,6 +65,7 @@ class IdeaState {
     return IdeaState(
       appId: clearApp ? null : appId ?? this.appId,
       ideas: ideas ?? this.ideas,
+      allIdeas: allIdeas ?? this.allIdeas,
       current: clearCurrent ? null : current ?? this.current,
       draftTitle: draftTitle ?? this.draftTitle,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -122,11 +126,18 @@ class IdeaController extends StateNotifier<IdeaState> {
       throw StateError('Select or create an App before capturing an Idea.');
     }
     try {
-      final idea = await _service.capture(appId, sortOrder: state.ideas.length);
+      ++_searchEpoch;
+      final idea = await _service.capture(
+        appId,
+        sortOrder: state.allIdeas.length,
+      );
+      final allIdeas = [idea, ...state.allIdeas];
       state = state.copyWith(
-        ideas: [idea, ...state.ideas],
+        ideas: allIdeas,
+        allIdeas: allIdeas,
         current: idea,
         draftTitle: idea.title,
+        searchQuery: '',
         saveState: IdeaSaveState.saved,
         isDirty: false,
         clearError: true,
@@ -219,6 +230,7 @@ class IdeaController extends StateNotifier<IdeaState> {
       await _service.softDelete(id);
       state = state.copyWith(
         ideas: state.ideas.where((idea) => idea.id != id).toList(),
+        allIdeas: state.allIdeas.where((idea) => idea.id != id).toList(),
         clearCurrent: state.current?.id == id,
         draftTitle: state.current?.id == id ? '' : state.draftTitle,
         saveState: IdeaSaveState.idle,
@@ -240,6 +252,10 @@ class IdeaController extends StateNotifier<IdeaState> {
           for (final item in state.ideas)
             if (item.id == id) updated else item,
         ],
+        allIdeas: [
+          for (final item in state.allIdeas)
+            if (item.id == id) updated else item,
+        ],
         current: state.current?.id == id ? updated : state.current,
         saveState: state.current?.id == id
             ? IdeaSaveState.saved
@@ -258,6 +274,7 @@ class IdeaController extends StateNotifier<IdeaState> {
       if (state.appId == appId) {
         state = state.copyWith(
           ideas: ideas,
+          allIdeas: ideas,
           isLoading: false,
           clearError: true,
         );
@@ -280,9 +297,14 @@ class IdeaController extends StateNotifier<IdeaState> {
         for (final item in state.ideas)
           if (item.id == updated.id) updated else item,
       ];
+      final allIdeas = [
+        for (final item in state.allIdeas)
+          if (item.id == updated.id) updated else item,
+      ];
       final unchanged = state.revision == revision;
       state = state.copyWith(
         ideas: ideas,
+        allIdeas: allIdeas,
         current: updated,
         saveState: unchanged ? IdeaSaveState.saved : IdeaSaveState.saving,
         isDirty: !unchanged,

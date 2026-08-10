@@ -86,8 +86,7 @@ void main() {
     final first = controller.state.blocks.single;
 
     controller.updateText(first.id, '/heading');
-    await controller.flush();
-    await Future<void>.delayed(Duration.zero);
+    await controller.executeSlashCommand(first.id);
     expect(controller.state.blocks.single.type, ContentBlockType.heading);
 
     final paragraph = await controller.add(ContentBlockType.paragraph);
@@ -161,6 +160,190 @@ void main() {
       expect(controller.state.blocks.single.text, '/code followed by text');
     },
   );
+
+  test('text edits undo, redo, and supersede stale autosave work', () async {
+    final fixture = await _ControllerFixture.create();
+    addTearDown(fixture.database.close);
+    final controller = fixture.controller;
+    addTearDown(controller.dispose);
+    await controller.openIdea(fixture.idea.id);
+    final id = controller.state.blocks.single.id;
+
+    controller.updateText(id, 'daily');
+    controller.updateText(id, 'daily editor');
+    expect(controller.state.canUndo, isTrue);
+    await controller.undo();
+    expect(controller.state.blocks.single.text, isEmpty);
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    expect((await fixture.blocks.getById(id))?.text, isEmpty);
+
+    await controller.redo();
+    expect(controller.state.blocks.single.text, 'daily editor');
+    expect((await fixture.blocks.getById(id))?.text, 'daily editor');
+  });
+
+  test('add and delete undo preserve the same block UUID', () async {
+    final fixture = await _ControllerFixture.create();
+    addTearDown(fixture.database.close);
+    final controller = fixture.controller;
+    addTearDown(controller.dispose);
+    await controller.openIdea(fixture.idea.id);
+
+    final added = await controller.add(ContentBlockType.code);
+    await controller.undo();
+    expect(
+      controller.state.blocks.any((block) => block.id == added.id),
+      isFalse,
+    );
+    await controller.redo();
+    expect(controller.state.blocks.last.id, added.id);
+
+    await controller.delete(added.id);
+    expect(controller.state.activeBlockId, controller.state.blocks.first.id);
+    await controller.undo();
+    expect(
+      controller.state.blocks.any((block) => block.id == added.id),
+      isTrue,
+    );
+    expect((await fixture.blocks.getById(added.id))?.isDeleted, isFalse);
+    await controller.redo();
+    expect((await fixture.blocks.getById(added.id))?.isDeleted, isTrue);
+  });
+
+  test('reorder, type, checklist, and code language changes undo', () async {
+    final fixture = await _ControllerFixture.create();
+    addTearDown(fixture.database.close);
+    final controller = fixture.controller;
+    addTearDown(controller.dispose);
+    await controller.openIdea(fixture.idea.id);
+    final first = controller.state.blocks.single;
+    final second = await controller.add(ContentBlockType.paragraph);
+
+    await controller.move(second.id, -1);
+    expect(controller.state.blocks.first.id, second.id);
+    await controller.undo();
+    expect(controller.state.blocks.first.id, first.id);
+    await controller.redo();
+    expect(controller.state.blocks.first.id, second.id);
+
+    await controller.changeType(second.id, ContentBlockType.heading);
+    controller.updateMetadata(second.id, const {'level': 3});
+    await controller.flush();
+    await controller.undo();
+    expect(
+      controller.state.blocks
+          .firstWhere((block) => block.id == second.id)
+          .headingLevel,
+      1,
+    );
+    await controller.undo();
+    expect(
+      controller.state.blocks.firstWhere((block) => block.id == second.id).type,
+      ContentBlockType.paragraph,
+    );
+
+    await controller.changeType(second.id, ContentBlockType.checklist);
+    await controller.toggleChecklist(second.id, true);
+    await controller.undo();
+    expect(
+      controller.state.blocks
+          .firstWhere((block) => block.id == second.id)
+          .isChecked,
+      isFalse,
+    );
+
+    await controller.changeType(second.id, ContentBlockType.code);
+    controller.updateMetadata(second.id, const {'language': 'python'});
+    await controller.flush();
+    await controller.undo();
+    expect(
+      controller.state.blocks
+          .firstWhere((block) => block.id == second.id)
+          .codeLanguage,
+      'plainText',
+    );
+  });
+
+  test('fenced conversion is undoable and restores its marker', () async {
+    final fixture = await _ControllerFixture.create();
+    addTearDown(fixture.database.close);
+    final controller = fixture.controller;
+    addTearDown(controller.dispose);
+    await controller.openIdea(fixture.idea.id);
+    final id = controller.state.blocks.single.id;
+
+    controller.updateText(id, '```python');
+    await controller.flush();
+    await Future<void>.delayed(Duration.zero);
+    expect(controller.state.blocks.single.type, ContentBlockType.code);
+    await controller.undo();
+    expect(controller.state.blocks.single.type, ContentBlockType.paragraph);
+    expect(controller.state.blocks.single.text, '```python');
+  });
+
+  test(
+    'split, Backspace merge, focus navigation, and final delete stay usable',
+    () async {
+      final fixture = await _ControllerFixture.create();
+      addTearDown(fixture.database.close);
+      final controller = fixture.controller;
+      addTearDown(controller.dispose);
+      await controller.openIdea(fixture.idea.id);
+      final first = controller.state.blocks.single;
+      controller.updateText(first.id, 'Hello today');
+      await controller.splitBlock(first.id, 6);
+
+      expect(controller.state.blocks.map((block) => block.text), [
+        'Hello ',
+        'today',
+      ]);
+      final second = controller.state.blocks.last;
+      controller.focusRelative(second.id, -1);
+      expect(controller.state.activeBlockId, first.id);
+      controller.focusLast();
+      expect(controller.state.activeBlockId, second.id);
+
+      await controller.handleBackspace(second.id);
+      expect(controller.state.blocks.single.text, 'Hello today');
+      await controller.delete(controller.state.blocks.single.id);
+      expect(controller.state.blocks, hasLength(1));
+      expect(controller.state.blocks.single.type, ContentBlockType.paragraph);
+      expect(controller.state.activeBlockId, controller.state.blocks.single.id);
+
+      final checklist = await controller.add(ContentBlockType.checklist);
+      await controller.handleBackspace(checklist.id);
+      expect(
+        controller.state.blocks.any((block) => block.id == checklist.id),
+        isFalse,
+      );
+      expect(
+        await fixture.database.select(fixture.database.ideas).get(),
+        hasLength(1),
+      );
+    },
+  );
+
+  test('slash command options filter aliases and execute directly', () async {
+    final fixture = await _ControllerFixture.create();
+    addTearDown(fixture.database.close);
+    final controller = fixture.controller;
+    addTearDown(controller.dispose);
+    await controller.openIdea(fixture.idea.id);
+    final id = controller.state.blocks.single.id;
+
+    controller.updateText(id, '/cs');
+    expect(
+      controller.state.slashOptions.map((option) => option.label),
+      contains('Code â€” C#'),
+    );
+    controller.moveSlashSelection(1);
+    controller.dismissSlashMenu();
+    expect(controller.state.slashOptions, isEmpty);
+    controller.updateText(id, '/python');
+    await controller.executeSlashCommand(id);
+    expect(controller.state.blocks.single.type, ContentBlockType.code);
+    expect(controller.state.blocks.single.codeLanguage, 'python');
+  });
 
   test('failed block save retains dirty text for retry', () async {
     const ideaId = EntityId('idea');
@@ -286,6 +469,13 @@ class _FailingBlockRepository implements ContentBlockRepository {
 
   @override
   Future<void> softDelete(EntityId id, DateTime updatedAt) async {}
+
+  @override
+  Future<void> setDeleted(
+    EntityId id, {
+    required bool isDeleted,
+    required DateTime updatedAt,
+  }) async {}
 
   @override
   Future<ContentBlock> update({

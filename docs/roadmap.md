@@ -28,7 +28,8 @@ Implementation progress as of 2026-08-08:
 - Added repository and application-service boundaries, empty-database hierarchy creation, Explorer display of persisted hierarchy with stable in-session App selection, capture-first plain-text Idea editing, debounced autosave, explicit `Ctrl+S` flush, current-App title/body search, and confirmed soft deletion.
 - Added in-memory, temporary-file restart, application, widget, and existing-shell regression tests.
 - Added schema version 2 with an explicit non-destructive migration, optional Idea Group CRUD, All/Ungrouped/group views, safe same-App assignment, App-wide search across groups, and transactional archive-and-ungroup behavior.
-- Added schema version 3 and the first Idea block editor with eight block types, legacy-body migration, ordered soft-deleted blocks, block autosave, slash/fence insertion, inline Code language and Copy controls, and App-wide block-text search.
+- Added schema version 3 and the first Idea block editor with eight block types, legacy-body migration, ordered soft-deleted blocks, block autosave, slash/fence insertion, inline Code language and Copy controls, App-wide block-text search, session undo/redo, keyboard block navigation, and daily focus/accessibility polish.
+- Extended the Project Explorer through Idea Groups, Ungrouped, and Idea titles with a devGarden-owned connector tree; added `Shift+Enter` inline line breaks and the first stacked, collapsible multi-Idea App workspace with per-Idea autosave and undo. This does not complete the freeform pinboard milestone.
 - Additional Idea metadata, full Trash, FTS, pinboard, sync, and mobile work remain deferred to their planned milestones.
 
 - Launchable desktop shell with menu, toolbar, Project Explorer, divider, work area, and status bar.
@@ -49,9 +50,9 @@ Implementation progress as of 2026-08-08:
 - Paragraphs, headings, lists, checklists, quotes, and dividers.
 - Editable code with language selection and copy.
 - Slash commands and fenced-code conversion.
-- Undo/redo, autosave, and safe block serialization.
+- Undo/redo, autosave, and safe block serialization. Initial block-aware session history is implemented.
 
-The initial block types, code editing, slash/fence conversion, autosave, and safe versioned persistence are implemented. Syntax highlighting, richer inline formatting, drag-and-drop, and block-aware undo/redo remain deferred.
+The initial block types, code editing, slash/fence conversion, autosave, safe versioned persistence, block-aware undo/redo, natural block-boundary editing, compact controls, and keyboard focus movement are implemented. Syntax highlighting, richer inline formatting, and drag-and-drop remain deferred.
 
 ## Milestone 4 — Desktop pinboard
 
